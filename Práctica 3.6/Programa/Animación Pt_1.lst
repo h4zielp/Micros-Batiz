@@ -1,0 +1,1238 @@
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ; CECYT 9 JUAN DE DIOS BATIZ.
+                      00002 ;
+                      00003 ; PRACTICA 0';.
+                      00004 ; MANEJO DE UN LED OSCILANDO A 1 Hz.
+                      00005 ;
+                      00006 ; EQUIPO:       GRUPO: 6IMX.
+                      00007 ;
+                      00008 ; INTEGRANTES:
+                      00009 ;
+                      00010 ; FECHA DE ENTREGA DEL REPORTE.
+                      00011 ;
+                      00012 ; ESTE PROGRAMA CONTROLA UN LED HACIENDOLO OSCILAR A UNA
+                      00013 ; FRECUENCIA DE UN SEGUNDO, UTILIZANDO
+                      00014 ; INTERRUPCIONES CON EL TMR0.
+                      00015 ;
+                      00016 ;--------------------------------------------------------------------------------------------------
+                      00017  LIST   P=16F877A;
+                      00018  
+                      00019  #INCLUDE "C:\Program Files (x86)\Microchip\MPASM Suite\P16F877A.INC";
+                      00001         LIST
+                      00002 ; P16F877A.INC  Standard Header File, Version 1.00    Microchip Technology, Inc.
+                      00400         LIST
+                      00020  ;#include "C:\Program Files\Microchip\MPASM Suite\P16F877A.INC";
+                      00021 
+                      00022  
+2007   3F39           00023  __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_OFF & _XT_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF;
+                      00024 ;--------------------------------------------------------------------------------------------------
+                      00025 ;
+                      00026 ; Fosc = 4 MHz.
+                      00027 ; Ciclo de trabajo del PIC = (1/fosc)*4 = 1 µs.
+                      00028 ; T int =(256-tmr0)*(P)*((1/4000000)*4) = 1 ms. // Tiempo de interrupciÛn.
+                      00029 ; tmr0=131, P=8.
+                      00030 ; frec int = 1/ t int = 1 KHz.
+                      00031 ;----------------------------------------------------------------------------------------------------
+                      00032 ;
+                      00033 ;Def. de variables del programa en RAM.
+                      00034 
+  00000020            00035 RESP_W                  EQU 0X20;
+  00000021            00036 RESP_STATUS     EQU 0X21;
+  00000022            00037 RES_PCLATH              EQU 0X22;
+  00000023            00038 RES_FSR                 EQU 0X23;
+  00000024            00039 PRESC_1                 EQU 0X24; .001 100 5
+  00000025            00040 PRESC_2                 EQU 0X25; t int = t intb * presc_1 * presc_2
+  00000026            00041 VAR_CONTEO              EQU 0X26;
+  00000027            00042 VAR_CONTROL             EQU 0X27;
+  00000028            00043 CONT_MILIS              EQU 0X28;
+  00000029            00044 CONT_MILS               EQU 0X29;
+  0000002A            00045 VAR_GLOBAL_CONT EQU 0X2A;
+  0000002B            00046 VAR_CONTROL2    EQU 0X2B;
+                      00047 ;---------------------------------------------------------------------------------------------------
+                      00048 ; Def. de constantes a utilizar.
+  00000085            00049 TMB     EQU     .133;
+  00000005            00050 TMS     EQU .5;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00051 
+  00000001            00052 ACT_COL_0 EQU 0X01;
+  00000002            00053 ACT_COL_1 EQU 0X02;
+  00000004            00054 ACT_COL_2 EQU 0X04;
+  00000008            00055 ACT_COL_3 EQU 0X08;
+  00000010            00056 ACT_COL_4 EQU 0X10;
+  00000000            00057 DES_COLUM EQU 0X00;
+                      00058 ;                                               0 1 2 3 4
+  000000C1            00059 COL_0_— EQU     0XC1;   0         *     * * 
+  000000FA            00060 COL_1_— EQU 0XFA;       1       *               *
+  000000F6            00061 COL_2_— EQU     0XF6;   2       * *             *
+  000000EE            00062 COL_3_— EQU     0XEE;   3       *   *   *
+  000000C1            00063 COL_4_— EQU     0XC1;   4       *     * *
+                      00064 ;                                       5       *       *
+                      00065 ;                                       6
+                      00066 ;                                       7
+                      00067 ;
+                      00068 ;                                               0 1 2 3 4
+  000000FF            00069 COL_0_P EQU     0XFF;   0              
+  000000F7            00070 COL_1_P EQU 0XF7;       1             * 
+  000000EB            00071 COL_2_P EQU     0XEB;   2           *   
+  000000DD            00072 COL_3_P EQU     0XDD;   3         *   
+  000000FF            00073 COL_4_P EQU     0XFF;   4           *   
+                      00074 ;                                       5         *
+                      00075 ;                                       6
+                      00076 ;                                       7
+                      00077 
+                      00078 ;                                               0 1 2 3 4
+  000000FD            00079 COL_0_? EQU     0XFD;   0              
+  000000FE            00080 COL_1_? EQU 0XFE;       1              
+  000000A6            00081 COL_2_? EQU     0XA6;   2               
+  000000FA            00082 COL_3_? EQU     0XFA;   3            
+  000000FD            00083 COL_4_? EQU     0XFD;   4              
+                      00084 ;                                       5          
+                      00085 ;                                       6
+                      00086 ;                                       7
+                      00087 
+                      00088 ;                                               0 1 2 3 4
+  000000C0            00089 COL_0_R EQU     0XC0;   0       *   * *   
+  000000FD            00090 COL_1_R EQU 0XFD;       1       * *     *  
+  000000FE            00091 COL_2_R EQU     0XFE;   2       *       
+  000000FE            00092 COL_3_R EQU     0XFE;   3       *     
+  000000FD            00093 COL_4_R EQU     0XFD;   4       *       
+                      00094 ;                                       5   *      
+                      00095 ;                                       6
+                      00096 ;                                       7
+                      00097 
+                      00098 ;                                               0 1 2 3 4
+  000000FF            00099 COL_0_9 EQU     0XFF;   0           * *   
+  000000E9            00100 COL_1_9 EQU 0XE9;       1         *     *  
+  000000D6            00101 COL_2_9 EQU     0XD6;   2         *     *
+  000000D6            00102 COL_3_9 EQU     0XD6;   3           * * *
+  000000E1            00103 COL_4_9 EQU     0XE1;   4         *     * 
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00104 ;                                       5       * * 
+                      00105 ;                                       6
+                      00106 ;                                       7       
+                      00107 
+                      00108 ;                                                       0 1 2 3 4
+  000000EF            00109 COL_0_MU1       EQU     0XEF;   0   
+  00000095            00110 COL_1_MU1       EQU 0X95;       1  
+  000000E2            00111 COL_2_MU1       EQU     0XE2;   2
+  00000095            00112 COL_3_MU1       EQU     0X95;   3
+  000000EF            00113 COL_4_MU1       EQU     0XEF;   4
+                      00114 ;                                               5
+                      00115 ;                                               6
+                      00116 ;                                               7
+                      00117 
+                      00118 ;                                                       0 1 2 3 4
+  000000BB            00119 COL_0_MU2       EQU     0XBB;   0   
+  000000D5            00120 COL_1_MU2       EQU 0XD5;       1  
+  000000E2            00121 COL_2_MU2       EQU     0XE2;   2
+  000000D5            00122 COL_3_MU2       EQU     0XD5;   3
+  000000BB            00123 COL_4_MU2       EQU     0XBB;   4
+                      00124 ;                                               5
+                      00125 ;                                               6
+                      00126 ;                                               7
+                      00127 
+                      00128 ;                                                       0 1 2 3 4
+  000000F7            00129 COL_0_MU3       EQU     0XF7;   0
+                      00130                                         ;       1          
+  00000097            00131 COL_1_MU3       EQU 0X97;       2               *
+  000000EB            00132 COL_2_MU3       EQU     0XEB;   3       * *   * *
+  00000097            00133 COL_3_MU3       EQU     0X97;   4               *
+  000000F7            00134 COL_4_MU3       EQU     0XF7;   5     *   *
+                      00135 ;                                               6         *   *
+                      00136 ;                                               7
+                      00137         
+                      00138 ;---------------------------------------------------------------------------------------------------
+                      00139 
+                      00140 ; Def. de Ptos. I/0.
+                      00141 
+                      00142 ; Puerto A.
+  00000000            00143 SIN_USORA0 EQU .0;
+  00000001            00144 SIN_USORA1 EQU .1;
+  00000002            00145 SIN_USORA2 EQU .2;
+  00000003            00146 SIN_USORA3 EQU .3;
+  00000004            00147 SIN_USORA4 EQU .4;
+  00000005            00148 SIN_USORA5 EQU .5;
+                      00149 
+  0000003F            00150 PROGA EQU B'111111';Def. la config. de los bits del pto. a.
+                      00151 
+                      00152 ;Puerto B.
+  00000000            00153 COL_0 EQU .0;
+  00000001            00154 COL_1 EQU .1;
+  00000002            00155 COL_2 EQU .2;
+  00000003            00156 COL_3 EQU .3;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000004            00157 COL_4 EQU .4;
+  00000005            00158 COL_5 EQU .5;
+  00000006            00159 COL_6 EQU .6;
+  00000007            00160 COL_7 EQU .7;
+                      00161 
+  00000000            00162 PROGB EQU B'00000000'; // ProgramaciÛn inicial del puerto B.
+                      00163 
+                      00164 ;Puerto C.
+  00000000            00165 SIN_USORD0 EQU .0;
+  00000001            00166 SIN_USORD1 EQU .1;
+  00000002            00167 SIN_USORD2 EQU .2;
+  00000003            00168 SIN_USORD3 EQU .3;
+  00000004            00169 SIN_USORD4 EQU .4;
+  00000005            00170 SIN_USORD5 EQU .5;
+  00000006            00171 SIN_USORD6 EQU .6;
+  00000007            00172 SIN_USORD7 EQU .7;
+                      00173 
+  000000FF            00174 PROGC EQU B'11111111';Def.
+                      00175 
+                      00176 ;Puerto D.
+  00000000            00177 FIL_0 EQU .0;
+  00000001            00178 FIL_1 EQU .1;
+  00000002            00179 FIL_2 EQU .2;
+  00000003            00180 FIL_3 EQU .3;
+  00000004            00181 FIL_4 EQU .4;
+  00000005            00182 FIL_5 EQU .5;
+  00000006            00183 FIL_6 EQU .6;
+  00000007            00184 FIL_7 EQU .7;
+                      00185 
+  00000000            00186 PROGD EQU B'00000000'; // ProgramaciÛn inicial del puerto C como 
+                      00187                                                  ;Entrada.
+                      00188 
+                      00189 ; Puerto E.
+  00000000            00190 SIN_USORE0 EQU .0;
+  00000001            00191 SIN_USORE1 EQU .1;
+  00000002            00192 LED_ROJO   EQU .2;
+                      00193 
+  00000003            00194 PROGE EQU B'011';Def. la encua.
+                      00195 ;-------------------------------------------------------------------------------------------------
+                      00196 
+                      00197                         ;=================
+                      00198                         ;== Vector Reset ==
+                      00199                         ;=================
+0000                  00200                         ORG 0X00;
+0000   018A           00201 VEC_RESET       CLRF PCLATH;
+                      00202 
+0001   28A7           00203                         GOTO PROG_PRIN;
+                      00204 ;-------------------------------------------------------------------------------------------------
+                      00205 
+                      00206                         ;=============================
+                      00207                         ;== Subrutina de Interrupciones ==
+                      00208                         ;=============================
+                      00209                         
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0004                  00210                         ORG 0X04;
+0004   00A0           00211 VEC_INT         MOVWF RESP_W;resp. esl estado del reg. w.
+0005   0803           00212                         MOVF STATUS,W;
+0006   00A1           00213                         MOVWF RESP_STATUS;resp. banderas de la alu.
+0007   0183           00214                         CLRF STATUS;
+0008   080A           00215                         MOVF PCLATH,W;
+0009   00A2           00216                         MOVWF RES_PCLATH;
+000A   018A           00217                         CLRF PCLATH;
+000B   0804           00218                         MOVF FSR,W;
+000C   00A3           00219                         MOVWF RES_FSR;
+                      00220 
+000D   190B           00221                         BTFSC INTCON,T0IF;
+000E   2034           00222                         CALL RUTINA_INT;
+                      00223 
+000F   0823           00224 SAL_INT         MOVF RES_FSR,W;
+0010   0084           00225                         MOVWF FSR;
+0011   0822           00226                         MOVF RES_PCLATH,W;
+0012   008A           00227                         MOVWF PCLATH;
+0013   0821           00228                         MOVF RESP_STATUS,W;
+0014   0083           00229                         MOVWF STATUS;
+0015   0820           00230                         MOVF RESP_W,W;
+0016   3085           00231                         MOVLW TMB;
+0017   0081           00232                         MOVWF TMR0;
+                      00233                         
+0018   0009           00234                         RETFIE;
+                      00235 ;--------------------------------------------------------------------------------------------------
+                      00236 
+                      00237                         ;================================
+                      00238                         ;== Subrutina de Ini. de Reg. del Pic ==
+                      00239                         ;================================
+                      00240 
+0019   1683           00241 PROG_INI        BSF STATUS,RP0; Ponte en el banco 1 de ram.
+001A   3082           00242                         MOVLW 0X82;
+001B   0081           00243                         MOVWF OPTION_REG ^0X80;
+001C   303F           00244                         MOVLW PROGA;
+001D   0085           00245                         MOVWF TRISA ^0X80;
+001E   3000           00246                         MOVLW PROGB;
+001F   0086           00247                         MOVWF TRISB ^0X80;
+0020   30FF           00248                         MOVLW PROGC;
+0021   0087           00249                         MOVWF TRISC ^0X80;
+0022   3000           00250                         MOVLW PROGD;
+0023   0088           00251                         MOVWF TRISD ^0X80;
+0024   3003           00252                         MOVLW PROGE;
+0025   0089           00253                         MOVWF TRISE ^0X80;
+0026   3006           00254                         MOVLW 0X06;
+0027   009F           00255                         MOVWF ADCON1 ^0X80;
+                      00256                         
+0028   1283           00257                         BCF STATUS,RP0; Ponte en el banco 0 de ram.
+0029   1303           00258                         BCF STATUS,RP1; Ponte en el banco 0 de ram.     
+                      00259                                 
+002A   0186           00260                         CLRF PORTB;
+002B   01A8           00261                         CLRF CONT_MILIS;
+002C   01A9           00262                         CLRF CONT_MILS;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00263                         
+002D   30FF           00264                         MOVLW 0XFF;
+002E   0088           00265                         MOVWF PORTD;
+                      00266                         
+002F   30A0           00267                         MOVLW 0XA0;
+0030   008B           00268                         MOVWF INTCON;
+0031   3085           00269                         MOVLW TMB;
+0032   0081           00270                         MOVWF TMR0;
+                      00271                         
+0033   0008           00272                         RETURN;
+                      00273                         
+                      00274 ;--------------------------------------------------------------------------------------------------
+                      00275 
+                      00276                         ;=============================
+                      00277                         ;== Subrutina de Interrupciones ==
+                      00278                         ;=============================
+                      00279                         
+0034   0AA8           00280 RUTINA_INT      INCF CONT_MILIS,F;
+0035   0AA4           00281                         INCF PRESC_1,F;
+                      00282 
+0036   3064           00283                         MOVLW .100;
+0037   0624           00284                         XORWF PRESC_1,W;
+0038   1D03           00285                         BTFSS STATUS,Z;
+0039   284B           00286                         GOTO SAL_RUTINT;
+003A   0AA9           00287                         INCF CONT_MILS,F;
+003B   0AAB           00288                         INCF VAR_CONTROL2,F;
+003C   283D           00289                         GOTO SIG_INT;
+                      00290 
+003D   01A4           00291 SIG_INT         CLRF PRESC_1;
+003E   0AA5           00292                         INCF PRESC_2,F;
+003F   300A           00293                         MOVLW .10;
+0040   0625           00294                         XORWF PRESC_2,W;
+0041   1D03           00295                         BTFSS STATUS,Z;
+0042   284B           00296                         GOTO SAL_RUTINT;
+0043   01A4           00297                         CLRF PRESC_1;
+0044   01A5           00298                         CLRF PRESC_2;
+                      00299                         
+0045   0AA7           00300                         INCF VAR_CONTROL,F;
+                      00301                         
+0046   1D09           00302                         BTFSS PORTE,LED_ROJO;
+0047   284A           00303                         GOTO SEC_LED;
+0048   1109           00304                         BCF PORTE,LED_ROJO; Prende el led.
+0049   284B           00305                         GOTO SAL_RUTINT;
+                      00306                         
+004A   1509           00307 SEC_LED         BSF PORTE,LED_ROJO; Apaga el led.
+                      00308 
+004B   110B           00309 SAL_RUTINT      BCF INTCON,T0IF;
+                      00310                         
+004C   0008           00311                         RETURN;
+                      00312 ;--------------------------------------------------------------------------------------------------
+004D   0826           00313 LISTA_ACT_COL   MOVF VAR_CONTEO,W;
+004E   0782           00314                                 ADDWF PCL,F;
+004F   0000           00315                                 NOP;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0050   3401           00316                                 RETLW ACT_COL_0;
+0051   3402           00317                                 RETLW ACT_COL_1;
+0052   3404           00318                                 RETLW ACT_COL_2;
+0053   3408           00319                                 RETLW ACT_COL_3;
+0054   3410           00320                                 RETLW ACT_COL_4;
+0055   0000           00321                                 NOP;
+0056   0008           00322                                 RETURN;
+                      00323 ;--------------------------------------------------------------------------------------------------
+0057   0826           00324 LISTA_—                 MOVF VAR_CONTEO,W;
+0058   0782           00325                                 ADDWF PCL,F;
+0059   0000           00326                                 NOP;
+005A   34C1           00327                                 RETLW COL_0_—;
+005B   34FA           00328                                 RETLW COL_1_—;
+005C   34F6           00329                                 RETLW COL_2_—;
+005D   34EE           00330                                 RETLW COL_3_—;
+005E   34C1           00331                                 RETLW COL_4_—;
+005F   0000           00332                                 NOP;
+0060   0008           00333                                 RETURN;
+                      00334 ;--------------------------------------------------------------------------------------------------
+0061   0826           00335 LISTA_P                 MOVF VAR_CONTEO,W;
+0062   0782           00336                                 ADDWF PCL,F;
+0063   0000           00337                                 NOP;
+0064   34FF           00338                                 RETLW COL_0_P;
+0065   34F7           00339                                 RETLW COL_1_P;
+0066   34EB           00340                                 RETLW COL_2_P;
+0067   34DD           00341                                 RETLW COL_3_P;
+0068   34FF           00342                                 RETLW COL_4_P;
+0069   0000           00343                                 NOP;
+006A   0008           00344                                 RETURN;
+                      00345 ;--------------------------------------------------------------------------------------------------
+006B   0826           00346 LISTA_?                 MOVF VAR_CONTEO,W;
+006C   0782           00347                                 ADDWF PCL,F;
+006D   0000           00348                                 NOP;
+006E   34FD           00349                                 RETLW COL_0_?;
+006F   34FE           00350                                 RETLW COL_1_?;
+0070   34A6           00351                                 RETLW COL_2_?;
+0071   34FA           00352                                 RETLW COL_3_?;
+0072   34FD           00353                                 RETLW COL_4_?;
+0073   0000           00354                                 NOP;
+0074   0008           00355                                 RETURN;
+                      00356 ;--------------------------------------------------------------------------------------------------
+0075   0826           00357 LISTA_R                 MOVF VAR_CONTEO,W;
+0076   0782           00358                                 ADDWF PCL,F;
+0077   0000           00359                                 NOP;
+0078   34C0           00360                                 RETLW COL_0_R;
+0079   34FD           00361                                 RETLW COL_1_R;
+007A   34FE           00362                                 RETLW COL_2_R;
+007B   34FE           00363                                 RETLW COL_3_R;
+007C   34FD           00364                                 RETLW COL_4_R;
+007D   0000           00365                                 NOP;
+007E   0008           00366                                 RETURN;
+                      00367 ;--------------------------------------------------------------------------------------------------
+007F   0826           00368 LISTA_9                 MOVF VAR_CONTEO,W;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0080   0782           00369                                 ADDWF PCL,F;
+0081   0000           00370                                 NOP;
+0082   34FF           00371                                 RETLW COL_0_9;
+0083   34E9           00372                                 RETLW COL_1_9;
+0084   34D6           00373                                 RETLW COL_2_9;
+0085   34D6           00374                                 RETLW COL_3_9;
+0086   34E1           00375                                 RETLW COL_4_9;
+0087   0000           00376                                 NOP;
+0088   0008           00377                                 RETURN;
+                      00378 ;--------------------------------------------------------------------------------------------------
+0089   0826           00379 LISTA_MU1               MOVF VAR_CONTEO,W;
+008A   0782           00380                                 ADDWF PCL,F;
+008B   0000           00381                                 NOP;
+008C   34EF           00382                                 RETLW COL_0_MU1;
+008D   3495           00383                                 RETLW COL_1_MU1;
+008E   34E2           00384                                 RETLW COL_2_MU1;
+008F   3495           00385                                 RETLW COL_3_MU1;
+0090   34EF           00386                                 RETLW COL_4_MU1;
+0091   0000           00387                                 NOP;
+0092   0008           00388                                 RETURN;
+                      00389 ;--------------------------------------------------------------------------------------------------
+0093   0826           00390 LISTA_MU2               MOVF VAR_CONTEO,W;
+0094   0782           00391                                 ADDWF PCL,F;
+0095   0000           00392                                 NOP;
+0096   34BB           00393                                 RETLW COL_0_MU2;
+0097   34D5           00394                                 RETLW COL_1_MU2;
+0098   34E2           00395                                 RETLW COL_2_MU2;
+0099   34D5           00396                                 RETLW COL_3_MU2;
+009A   34BB           00397                                 RETLW COL_4_MU2;
+009B   0000           00398                                 NOP;
+009C   0008           00399                                 RETURN;
+                      00400 ;--------------------------------------------------------------------------------------------------
+009D   0826           00401 LISTA_MU3               MOVF VAR_CONTEO,W;
+009E   0782           00402                                 ADDWF PCL,F;
+009F   0000           00403                                 NOP;
+00A0   34F7           00404                                 RETLW COL_0_MU3;
+00A1   3497           00405                                 RETLW COL_1_MU3;
+00A2   34EB           00406                                 RETLW COL_2_MU3;
+00A3   3497           00407                                 RETLW COL_3_MU3;
+00A4   34F7           00408                                 RETLW COL_4_MU3;
+00A5   0000           00409                                 NOP;
+00A6   0008           00410                                 RETURN;
+                      00411 ;--------------------------------------------------------------------------------------------------
+                      00412                         ;=====================
+                      00413                         ;== Programa principal ==
+                      00414                         ;=====================
+                      00415 
+00A7   2019           00416 PROG_PRIN       CALL PROG_INI;
+                      00417                         
+0100                  00418 LOOP_PRIN       ORG 0X0100;
+                      00419 
+0100   211C           00420                         CALL EÒE;
+0101   212E           00421                         CALL MENORQUE;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0102   2140           00422                         CALL INTERROGACI;
+0103   2152           00423                         CALL ERRE;
+0104   2164           00424                         CALL NUEVE;
+                      00425                         
+0105   2176           00426                         CALL MUÒECO_1;
+0106   2188           00427                         CALL MUÒECO_2;
+0107   2176           00428                         CALL MUÒECO_1;
+0108   2188           00429                         CALL MUÒECO_2;
+0109   2176           00430                         CALL MUÒECO_1;
+010A   2188           00431                         CALL MUÒECO_2;
+010B   2176           00432                         CALL MUÒECO_1;
+010C   2188           00433                         CALL MUÒECO_2;
+010D   2176           00434                         CALL MUÒECO_1;
+010E   2188           00435                         CALL MUÒECO_2;
+                      00436                         
+010F   2176           00437                         CALL MUÒECO_1;
+0110   219A           00438                         CALL MUÒECO_3;
+0111   2176           00439                         CALL MUÒECO_1;
+0112   219A           00440                         CALL MUÒECO_3;
+0113   2176           00441                         CALL MUÒECO_1;
+0114   219A           00442                         CALL MUÒECO_3;
+0115   2176           00443                         CALL MUÒECO_1;
+0116   219A           00444                         CALL MUÒECO_3;
+0117   2176           00445                         CALL MUÒECO_1;
+0118   219A           00446                         CALL MUÒECO_3;
+0119   2176           00447                         CALL MUÒECO_1;
+011A   219A           00448                         CALL MUÒECO_3;                  
+                      00449 
+011B   2900           00450                         GOTO LOOP_PRIN;
+                      00451                         
+                      00452 ;-------------------------------------------------------------------------------------------------------
+                            --
+011C   01A7           00453 EÒE                     CLRF VAR_CONTROL;
+011D   01A6           00454                         CLRF VAR_CONTEO;
+                      00455                         
+011E   3005           00456 ESP_—           MOVLW TMS;
+011F   0227           00457                         SUBWF VAR_CONTROL,W;
+0120   1903           00458                         BTFSC STATUS,Z;
+0121   0008           00459                         RETURN;
+                      00460                         
+0122   0AA6           00461                         INCF VAR_CONTEO,F;
+                      00462                         
+0123   204D           00463                         CALL LISTA_ACT_COL;
+0124   0086           00464                         MOVWF PORTB;
+                      00465                         
+0125   2057           00466                         CALL LISTA_—;
+0126   0088           00467                         MOVWF PORTD;
+                      00468                         
+0127   3005           00469                         MOVLW .5;
+0128   0226           00470                         SUBWF VAR_CONTEO,W;
+0129   1D03           00471                         BTFSS STATUS,Z;
+012A   292C           00472                         GOTO ESP_VUELTA1;
+012B   01A6           00473                         CLRF VAR_CONTEO;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00474                         
+012C   21AC           00475 ESP_VUELTA1     CALL RETARDO;
+012D   291E           00476                         GOTO ESP_—;
+                      00477 ;_______________________________________________________________________________________
+012E   01A7           00478 MENORQUE        CLRF VAR_CONTROL;
+012F   01A6           00479                         CLRF VAR_CONTEO;
+0130   3005           00480 ESP_MENORQ      MOVLW TMS;
+0131   0227           00481                         SUBWF VAR_CONTROL,W;
+0132   1903           00482                         BTFSC STATUS,Z;
+0133   0008           00483                         RETURN;
+                      00484                         
+0134   0AA6           00485                         INCF VAR_CONTEO,F;
+                      00486                         
+0135   204D           00487                         CALL LISTA_ACT_COL;
+0136   0086           00488                         MOVWF PORTB;
+                      00489                         
+0137   2061           00490                         CALL LISTA_P;
+0138   0088           00491                         MOVWF PORTD;
+                      00492                         
+0139   3005           00493                         MOVLW .5;
+013A   0226           00494                         SUBWF VAR_CONTEO,W;
+013B   1D03           00495                         BTFSS STATUS,Z;
+013C   293E           00496                         GOTO ESP_VUELTA2;
+013D   01A6           00497                         CLRF VAR_CONTEO;
+                      00498                         
+013E   21AC           00499 ESP_VUELTA2     CALL RETARDO;
+013F   2930           00500                         GOTO ESP_MENORQ;
+                      00501 ;_______________________________________________________________________________________
+0140   01A7           00502 INTERROGACI     CLRF VAR_CONTROL;
+0141   01A6           00503                         CLRF VAR_CONTEO;
+0142   3005           00504 ESP_INTERRO     MOVLW TMS;
+0143   0227           00505                         SUBWF VAR_CONTROL,W;
+0144   1903           00506                         BTFSC STATUS,Z;
+0145   0008           00507                         RETURN;
+                      00508                         
+0146   0AA6           00509                         INCF VAR_CONTEO,F;
+                      00510                         
+0147   204D           00511                         CALL LISTA_ACT_COL;
+0148   0086           00512                         MOVWF PORTB;
+                      00513                         
+0149   206B           00514                         CALL LISTA_?;
+014A   0088           00515                         MOVWF PORTD;
+                      00516                         
+014B   3005           00517                         MOVLW .5;
+014C   0226           00518                         SUBWF VAR_CONTEO,W;
+014D   1D03           00519                         BTFSS STATUS,Z;
+014E   2950           00520                         GOTO ESP_VUELTA3;
+014F   01A6           00521                         CLRF VAR_CONTEO;
+                      00522                         
+0150   21AC           00523 ESP_VUELTA3     CALL RETARDO;
+0151   2942           00524                         GOTO ESP_INTERRO;
+                      00525 ;_______________________________________________________________________________________
+0152   01A7           00526 ERRE            CLRF VAR_CONTROL;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0153   01A6           00527                         CLRF VAR_CONTEO;
+0154   3005           00528 ESP_ERRE        MOVLW TMS;
+0155   0227           00529                         SUBWF VAR_CONTROL,W;
+0156   1903           00530                         BTFSC STATUS,Z;
+0157   0008           00531                         RETURN;
+                      00532                         
+0158   0AA6           00533                         INCF VAR_CONTEO,F;
+                      00534                         
+0159   204D           00535                         CALL LISTA_ACT_COL;
+015A   0086           00536                         MOVWF PORTB;
+                      00537                         
+015B   2075           00538                         CALL LISTA_R;
+015C   0088           00539                         MOVWF PORTD;
+                      00540                         
+015D   3005           00541                         MOVLW .5;
+015E   0226           00542                         SUBWF VAR_CONTEO,W;
+015F   1D03           00543                         BTFSS STATUS,Z;
+0160   2962           00544                         GOTO ESP_VUELTA4;
+0161   01A6           00545                         CLRF VAR_CONTEO;
+                      00546                         
+0162   21AC           00547 ESP_VUELTA4     CALL RETARDO;
+0163   2954           00548                         GOTO ESP_ERRE;
+                      00549 ;_______________________________________________________________________________________
+0164   01A7           00550 NUEVE           CLRF VAR_CONTROL;
+0165   01A6           00551                         CLRF VAR_CONTEO;
+0166   3005           00552 ESP_NUEVE       MOVLW TMS;
+0167   0227           00553                         SUBWF VAR_CONTROL,W;
+0168   1903           00554                         BTFSC STATUS,Z;
+0169   0008           00555                         RETURN;
+                      00556                         
+016A   0AA6           00557                         INCF VAR_CONTEO,F;
+                      00558                         
+016B   204D           00559                         CALL LISTA_ACT_COL;
+016C   0086           00560                         MOVWF PORTB;
+                      00561                         
+016D   207F           00562                         CALL LISTA_9;
+016E   0088           00563                         MOVWF PORTD;
+                      00564                         
+016F   3005           00565                         MOVLW .5;
+0170   0226           00566                         SUBWF VAR_CONTEO,W;
+0171   1D03           00567                         BTFSS STATUS,Z;
+0172   2974           00568                         GOTO ESP_VUELTA5;
+0173   01A6           00569                         CLRF VAR_CONTEO;
+                      00570                         
+0174   21AC           00571 ESP_VUELTA5     CALL RETARDO;
+0175   2966           00572                         GOTO ESP_NUEVE;
+                      00573 ;_______________________________________________________________________________________                
+                                    
+0176   01AB           00574 MUÒECO_1        CLRF VAR_CONTROL2;
+0177   01A6           00575                         CLRF VAR_CONTEO;
+0178   3005           00576 ESP_MU1         MOVLW .5;
+0179   022B           00577                         SUBWF VAR_CONTROL2,W;
+017A   1903           00578                         BTFSC STATUS,Z;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 12
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+017B   0008           00579                         RETURN;
+                      00580                         
+017C   0AA6           00581                         INCF VAR_CONTEO,F;
+                      00582                         
+017D   204D           00583                         CALL LISTA_ACT_COL;
+017E   0086           00584                         MOVWF PORTB;
+                      00585                         
+017F   2089           00586                         CALL LISTA_MU1;
+0180   0088           00587                         MOVWF PORTD;
+                      00588                         
+0181   3005           00589                         MOVLW .5;
+0182   0226           00590                         SUBWF VAR_CONTEO,W;
+0183   1D03           00591                         BTFSS STATUS,Z;
+0184   2986           00592                         GOTO ESP_VUELTA6;
+0185   01A6           00593                         CLRF VAR_CONTEO;
+                      00594                         
+0186   21AC           00595 ESP_VUELTA6     CALL RETARDO;
+0187   2978           00596                         GOTO ESP_MU1;
+                      00597 ;_______________________________________________________________________________________
+0188   01AB           00598 MUÒECO_2        CLRF VAR_CONTROL2;
+0189   01A6           00599                         CLRF VAR_CONTEO;
+018A   3005           00600 ESP_MU2         MOVLW .5;
+018B   022B           00601                         SUBWF VAR_CONTROL2,W;
+018C   1903           00602                         BTFSC STATUS,Z;
+018D   0008           00603                         RETURN;
+                      00604                         
+018E   0AA6           00605                         INCF VAR_CONTEO,F;
+                      00606                         
+018F   204D           00607                         CALL LISTA_ACT_COL;
+0190   0086           00608                         MOVWF PORTB;
+                      00609                         
+0191   2093           00610                         CALL LISTA_MU2;
+0192   0088           00611                         MOVWF PORTD;
+                      00612                         
+0193   3005           00613                         MOVLW .5;
+0194   0226           00614                         SUBWF VAR_CONTEO,W;
+0195   1D03           00615                         BTFSS STATUS,Z;
+0196   2998           00616                         GOTO ESP_VUELTA7;
+0197   01A6           00617                         CLRF VAR_CONTEO;
+                      00618                         
+0198   21AC           00619 ESP_VUELTA7     CALL RETARDO;
+0199   298A           00620                         GOTO ESP_MU2;
+                      00621 ;_______________________________________________________________________________________
+019A   01AB           00622 MUÒECO_3        CLRF VAR_CONTROL2;
+019B   01A6           00623                         CLRF VAR_CONTEO;
+019C   3005           00624 ESP_MU3         MOVLW .5;
+019D   022B           00625                         SUBWF VAR_CONTROL2,W;
+019E   1903           00626                         BTFSC STATUS,Z;
+019F   0008           00627                         RETURN;
+                      00628                         
+01A0   0AA6           00629                         INCF VAR_CONTEO,F;
+                      00630                         
+01A1   204D           00631                         CALL LISTA_ACT_COL;
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 13
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01A2   0086           00632                         MOVWF PORTB;
+                      00633                         
+01A3   209D           00634                         CALL LISTA_MU3;
+01A4   0088           00635                         MOVWF PORTD;
+                      00636                         
+01A5   3005           00637                         MOVLW .5;
+01A6   0226           00638                         SUBWF VAR_CONTEO,W;
+01A7   1D03           00639                         BTFSS STATUS,Z;
+01A8   29AA           00640                         GOTO ESP_VUELTA8;
+01A9   01A6           00641                         CLRF VAR_CONTEO;
+                      00642                         
+01AA   21AC           00643 ESP_VUELTA8     CALL RETARDO;
+01AB   299C           00644                         GOTO ESP_MU3;
+                      00645 ;_______________________________________________________________________________________
+                      00646                         
+                      00647 
+                      00648 ;---------------------------------------------------------------------------------------------
+                      00649                         ;=========================================
+                      00650                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00651                         ;=========================================
+                      00652 
+01AC   01A8           00653 RETARDO     CLRF CONT_MILIS;
+01AD   3003           00654 ESP_INT1MS      MOVLW .3;
+01AE   0228           00655                         SUBWF CONT_MILIS,W;
+01AF   1D03           00656                         BTFSS STATUS,Z;
+01B0   29AD           00657                         GOTO  ESP_INT1MS;
+01B1   0008           00658                         RETURN;
+                      00659 ;--------------------------------------------------------------------------------------------------
+                      00660                         ;=========================================
+                      00661                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00662                         ;=========================================
+                      00663 
+01B2   01A9           00664 RETARDO_300MS   CLRF CONT_MILS;
+01B3   3005           00665 ESP_INT300MS    MOVLW .5;
+01B4   0229           00666                                 SUBWF CONT_MILS,W;
+01B5   1D03           00667                                 BTFSS STATUS,Z;
+01B6   29B3           00668                                 GOTO  ESP_INT300MS;
+01B7   0008           00669                                 RETURN;
+                      00670 ;--------------------------------------------------------------------------------------------------
+                      00671                         END
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ACT_COL_0                         00000001
+ACT_COL_1                         00000002
+ACT_COL_2                         00000004
+ACT_COL_3                         00000008
+ACT_COL_4                         00000010
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+CHS1                              00000004
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+COL_0                             00000000
+COL_0_9                           000000FF
+COL_0_?                           000000FD
+COL_0_MU1                         000000EF
+COL_0_MU2                         000000BB
+COL_0_MU3                         000000F7
+COL_0_P                           000000FF
+COL_0_R                           000000C0
+COL_0_—                           000000C1
+COL_1                             00000001
+COL_1_9                           000000E9
+COL_1_?                           000000FE
+COL_1_MU1                         00000095
+COL_1_MU2                         000000D5
+COL_1_MU3                         00000097
+COL_1_P                           000000F7
+COL_1_R                           000000FD
+COL_1_—                           000000FA
+COL_2                             00000002
+COL_2_9                           000000D6
+COL_2_?                           000000A6
+COL_2_MU1                         000000E2
+COL_2_MU2                         000000E2
+COL_2_MU3                         000000EB
+COL_2_P                           000000EB
+COL_2_R                           000000FE
+COL_2_—                           000000F6
+COL_3                             00000003
+COL_3_9                           000000D6
+COL_3_?                           000000FA
+COL_3_MU1                         00000095
+COL_3_MU2                         000000D5
+COL_3_MU3                         00000097
+COL_3_P                           000000DD
+COL_3_R                           000000FE
+COL_3_—                           000000EE
+COL_4                             00000004
+COL_4_9                           000000E1
+COL_4_?                           000000FD
+COL_4_MU1                         000000EF
+COL_4_MU2                         000000BB
+COL_4_MU3                         000000F7
+COL_4_P                           000000FF
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 16
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+COL_4_R                           000000FD
+COL_4_—                           000000C1
+COL_5                             00000005
+COL_6                             00000006
+COL_7                             00000007
+CONT_MILIS                        00000028
+CONT_MILS                         00000029
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+DES_COLUM                         00000000
+D_A                               00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+ERRE                              00000152
+ESP_ERRE                          00000154
+ESP_INT1MS                        000001AD
+ESP_INT300MS                      000001B3
+ESP_INTERRO                       00000142
+ESP_MENORQ                        00000130
+ESP_MU1                           00000178
+ESP_MU2                           0000018A
+ESP_MU3                           0000019C
+ESP_NUEVE                         00000166
+ESP_VUELTA1                       0000012C
+ESP_VUELTA2                       0000013E
+ESP_VUELTA3                       00000150
+ESP_VUELTA4                       00000162
+ESP_VUELTA5                       00000174
+ESP_VUELTA6                       00000186
+ESP_VUELTA7                       00000198
+ESP_VUELTA8                       000001AA
+ESP_—                             0000011E
+EÒE                               0000011C
+F                                 00000001
+FERR                              00000002
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+FIL_0                             00000000
+FIL_1                             00000001
+FIL_2                             00000002
+FIL_3                             00000003
+FIL_4                             00000004
+FIL_5                             00000005
+FIL_6                             00000006
+FIL_7                             00000007
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTERROGACI                       00000140
+INTF                              00000001
+IRP                               00000007
+LED_ROJO                          00000002
+LISTA_9                           0000007F
+LISTA_?                           0000006B
+LISTA_ACT_COL                     0000004D
+LISTA_MU1                         00000089
+LISTA_MU2                         00000093
+LISTA_MU3                         0000009D
+LISTA_P                           00000061
+LISTA_R                           00000075
+LISTA_—                           00000057
+LOOP_PRIN                         00000100
+MENORQUE                          0000012E
+MUÒECO_1                          00000176
+MUÒECO_2                          00000188
+MUÒECO_3                          0000019A
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 18
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_W                             00000002
+NOT_WRITE                         00000002
+NUEVE                             00000164
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PRESC_1                           00000024
+PRESC_2                           00000025
+PROGA                             0000003F
+PROGB                             00000000
+PROGC                             000000FF
+PROGD                             00000000
+PROGE                             00000003
+PROG_INI                          00000019
+PROG_PRIN                         000000A7
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+R                                 00000002
+RBIE                              00000003
+RBIF                              00000000
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RD                                00000000
+READ_WRITE                        00000002
+RESP_STATUS                       00000021
+RESP_W                            00000020
+RES_FSR                           00000023
+RES_PCLATH                        00000022
+RETARDO                           000001AC
+RETARDO_300MS                     000001B2
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RUTINA_INT                        00000034
+RX9                               00000006
+RX9D                              00000000
+R_W                               00000002
+S                                 00000003
+SAL_INT                           0000000F
+SAL_RUTINT                        0000004B
+SEC_LED                           0000004A
+SEN                               00000000
+SIG_INT                           0000003D
+SIN_USORA0                        00000000
+SIN_USORA1                        00000001
+SIN_USORA2                        00000002
+SIN_USORA3                        00000003
+SIN_USORA4                        00000004
+SIN_USORA5                        00000005
+SIN_USORD0                        00000000
+SIN_USORD1                        00000001
+SIN_USORD2                        00000002
+SIN_USORD3                        00000003
+SIN_USORD4                        00000004
+SIN_USORD5                        00000005
+SIN_USORD6                        00000006
+SIN_USORD7                        00000007
+SIN_USORE0                        00000000
+SIN_USORE1                        00000001
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMB                               00000085
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TMS                               00000005
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISB                             00000086
+TRISC                             00000087
+TRISD                             00000088
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 21
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+UA                                00000001
+VAR_CONTEO                        00000026
+VAR_CONTROL                       00000027
+VAR_CONTROL2                      0000002B
+VAR_GLOBAL_CONT                   0000002A
+VEC_INT                           00000004
+VEC_RESET                         00000000
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_HS_OSC                           00003FFE
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : XX--XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXX-------- ----------------
+0100 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0140 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0180 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXX--------
+MPASM  5.30.01                ANIMACIÛN PT_1.ASM   4-18-2024  8:27:13         PAGE 22
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   350
+Program Memory Words Free:  7842
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

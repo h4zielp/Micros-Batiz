@@ -1,0 +1,132 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Wed Apr 10 10:35:03 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x00036a
+.config_2007_PROGRAMA DEFI.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x0001b8      
+                            0x002007    0x002007      
+            440 out of 8456 program addresses used, program memory utilization is 5%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+              ARMA_TIEMPO   0x000156    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            BARRE_TECLADO   0x000077    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            CUENTA_TIEMPO   0x00012d    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  ESP_INT   0x000128    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               ESP_INT1MS   0x0001ae    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              ESP_INT40MS   0x0001b4    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               ESP_MEDSEG   0x000123    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC0   0x0000e4    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC1   0x0000e7    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC2   0x0000ea    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC3   0x0000ed    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC4   0x0000f0    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC5   0x0000f3    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC6   0x0000f6    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC7   0x0000f9    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC8   0x0000fc    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC9   0x0000ff    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECA   0x000102    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECB   0x000105    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECC   0x000108    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECD   0x00010b    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              FUE_TECGATO   0x000111    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               FUE_TECMUL   0x00010e    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  INI_LCD   0x000065    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 INI_TIME   0x000187    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                LOOP_PRIN   0x00005e    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            MUESTRA_TECLA   0x000115    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+           MUESTRA_TIEMPO   0x000169    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 MUES_TEC   0x00011f    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 PROG_INI   0x000031    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                PROG_PRIN   0x00005b    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+             PULSO_ENABLE   0x0001a8    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              RETARDO_1MS   0x0001ad    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 RET_40MS   0x0001b3    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               RUTINA_INT   0x000019    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                SALTE_CTA   0x000155    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            SALTE_CTA_MIN   0x000148    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+             SAL_BARRETEC   0x000114    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  SAL_INT   0x00000f    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              SAL_MUESTEC   0x000127    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               SAL_RUTEXT   0x00002e    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               SAL_RUTINT   0x00002f    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  SEC_LED   0x00002d    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  SIG_INT   0x000020    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 SIG_REN2   0x000092    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 SIG_REN3   0x0000ad    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 SIG_REN4   0x0000c8    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  VEC_INT   0x000004    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                VEC_RESET   0x000000    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  VEC_INT   0x000004    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  SAL_INT   0x00000f    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               RUTINA_INT   0x000019    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  SIG_INT   0x000020    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  SEC_LED   0x00002d    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               SAL_RUTEXT   0x00002e    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               SAL_RUTINT   0x00002f    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 PROG_INI   0x000031    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                PROG_PRIN   0x00005b    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                LOOP_PRIN   0x00005e    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  INI_LCD   0x000065    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            BARRE_TECLADO   0x000077    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 SIG_REN2   0x000092    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 SIG_REN3   0x0000ad    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 SIG_REN4   0x0000c8    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC0   0x0000e4    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC1   0x0000e7    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC2   0x0000ea    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC3   0x0000ed    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC4   0x0000f0    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC5   0x0000f3    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC6   0x0000f6    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC7   0x0000f9    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC8   0x0000fc    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TEC9   0x0000ff    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECA   0x000102    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECB   0x000105    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECC   0x000108    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 FUE_TECD   0x00010b    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               FUE_TECMUL   0x00010e    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              FUE_TECGATO   0x000111    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+             SAL_BARRETEC   0x000114    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            MUESTRA_TECLA   0x000115    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 MUES_TEC   0x00011f    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               ESP_MEDSEG   0x000123    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              SAL_MUESTEC   0x000127    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                  ESP_INT   0x000128    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            CUENTA_TIEMPO   0x00012d    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+            SALTE_CTA_MIN   0x000148    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                SALTE_CTA   0x000155    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              ARMA_TIEMPO   0x000156    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+           MUESTRA_TIEMPO   0x000169    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 INI_TIME   0x000187    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+             PULSO_ENABLE   0x0001a8    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              RETARDO_1MS   0x0001ad    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+               ESP_INT1MS   0x0001ae    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+                 RET_40MS   0x0001b3    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+              ESP_INT40MS   0x0001b4    program     static F:\AMM\Práctica 2.6\Programa\PROGRAMA DEFI.asm
+
+

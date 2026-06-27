@@ -1,0 +1,290 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Mon Apr 15 22:37:51 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x00092e
+   .config_2007_TECLADO.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x00049a      
+                            0x002007    0x002007      
+            1178 out of 8456 program addresses used, program memory utilization is 13%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+               ACTUALIZAT   0x000143    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                APAGA_LED   0x00002d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  BANDERA   0x00002e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              BARREDECHRS   0x0003c3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREDEC_HRS   0x000150    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREDEC_MIN   0x000415    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREDEC_SEG   0x000467    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREUNI_HRS   0x0003f6    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREUNI_MIN   0x000448    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREUNI_SEG   0x00049a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_DECM   0x000224    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_DECS   0x0002c0    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_UNIH   0x0001ce    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARRE_UNIHRS   0x00018a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_UNIM   0x00026a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_UNIS   0x000306    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                   CONVAS   0x000117    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                 CUENTA_T   0x0000d5    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  DIEZHRS   0x00018f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               DIEZ_HORAS   0x0000f8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               ESPERA_OUT   0x00013a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+           ESPERA_TECLADO   0x00012a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  ESP_INT   0x0000cf    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               ESP_INT1MS   0x000083    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_INT40MS   0x000089    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG1   0x000365    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG2   0x000373    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG3   0x000381    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG4   0x00038f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG5   0x00039d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG6   0x0003ab    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_DECHRS   0x0003b4    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_DECMIN   0x0003f7    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_DECSEG   0x000449    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_UNIHRS   0x0003c4    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_UNIMIN   0x000416    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_UNISEG   0x000468    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_DECHRS   0x0003b9    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_DECMIN   0x0003fc    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_DECSEG   0x00044e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_UNIHRS   0x0003c9    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_UNIMIN   0x00041b    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_UNISEG   0x00046d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_DECHRS   0x0003be    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_DECMIN   0x000401    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_DECSEG   0x000453    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_UNIHRS   0x0003ce    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_UNIMIN   0x000420    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_UNISEG   0x000472    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_DECMIN   0x000406    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_DECSEG   0x000458    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_UNIHRS   0x0003d3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_UNIMIN   0x000425    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_UNISEG   0x000477    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_DECMIN   0x00040b    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_DECSEG   0x00045d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_UNIHRS   0x0003d8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_UNIMIN   0x00042a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_UNISEG   0x00047c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_DECMIN   0x000410    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_DECSEG   0x000462    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_UNIHRS   0x0003dd    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_UNIMIN   0x00042f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_UNISEG   0x000481    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC6_UNIHRS   0x0003e2    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC6_UNIMIN   0x000434    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC6_UNISEG   0x000486    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC7_UNIHRS   0x0003e7    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC7_UNIMIN   0x000439    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC7_UNISEG   0x00048b    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC8_UNIHRS   0x0003ec    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC8_UNIMIN   0x00043e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC8_UNISEG   0x000490    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC9_UNIHRS   0x0003f1    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC9_UNIMIN   0x000443    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC9_UNISEG   0x000495    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             FUE_TECCLEAR   0x0003b0    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  INI_LCD   0x00006c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                LOOP_PRIN   0x000067    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                 PROG_INI   0x000032    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                PROG_PRIN   0x000065    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             PULSO_ENABLE   0x00007d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              RETARDO_1MS   0x000082    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                 RET_40MS   0x000088    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_BARRETEC   0x0003b3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SAL_CUENTAT   0x000116    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  SAL_INT   0x000010    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  SAL_SBR   0x000030    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWDECH   0x000369    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWDECM   0x000385    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWDECS   0x0003a1    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWUNIH   0x000377    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWUNIM   0x000393    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWUNIS   0x0003af    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SAL_WAITKEY   0x000142    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  SBR_INT   0x00001a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SHOW_DECHRS   0x00035c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_DECM   0x000378    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_DECS   0x000394    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_TIME   0x00008e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SHOW_UNIHRS   0x00036a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_UNIM   0x000386    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_UNIS   0x0003a2    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SIG_REN22   0x0001a8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_DH   0x000164    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_DM   0x00023c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_DS   0x0002d8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_UH   0x0001e6    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_UM   0x000282    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_US   0x00031e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SIG_REN32   0x0001b3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_DH   0x00016f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_DM   0x00024f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_DS   0x0002eb    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_UH   0x0001fd    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_UM   0x000299    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_US   0x000335    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SIG_REN42   0x0001be    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_DH   0x00017a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_DM   0x00025a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_DS   0x0002f6    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_UH   0x000214    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_UM   0x0002b0    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_US   0x00034c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                VEINTEHRS   0x000190    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             VEINTE_HORAS   0x00010c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  SAL_INT   0x000010    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  SBR_INT   0x00001a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                APAGA_LED   0x00002d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  BANDERA   0x00002e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  SAL_SBR   0x000030    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                 PROG_INI   0x000032    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                PROG_PRIN   0x000065    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                LOOP_PRIN   0x000067    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  INI_LCD   0x00006c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             PULSO_ENABLE   0x00007d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              RETARDO_1MS   0x000082    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               ESP_INT1MS   0x000083    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                 RET_40MS   0x000088    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_INT40MS   0x000089    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_TIME   0x00008e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  ESP_INT   0x0000cf    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                 CUENTA_T   0x0000d5    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               DIEZ_HORAS   0x0000f8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             VEINTE_HORAS   0x00010c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SAL_CUENTAT   0x000116    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                   CONVAS   0x000117    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+           ESPERA_TECLADO   0x00012a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               ESPERA_OUT   0x00013a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SAL_WAITKEY   0x000142    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               ACTUALIZAT   0x000143    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREDEC_HRS   0x000150    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_DH   0x000164    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_DH   0x00016f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_DH   0x00017a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARRE_UNIHRS   0x00018a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                  DIEZHRS   0x00018f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                VEINTEHRS   0x000190    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SIG_REN22   0x0001a8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SIG_REN32   0x0001b3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SIG_REN42   0x0001be    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_UNIH   0x0001ce    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_UH   0x0001e6    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_UH   0x0001fd    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_UH   0x000214    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_DECM   0x000224    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_DM   0x00023c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_DM   0x00024f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_DM   0x00025a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_UNIM   0x00026a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_UM   0x000282    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_UM   0x000299    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_UM   0x0002b0    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_DECS   0x0002c0    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_DS   0x0002d8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_DS   0x0002eb    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_DS   0x0002f6    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+               BARRE_UNIS   0x000306    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN2_US   0x00031e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN3_US   0x000335    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SIG_REN4_US   0x00034c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SHOW_DECHRS   0x00035c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG1   0x000365    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWDECH   0x000369    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              SHOW_UNIHRS   0x00036a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG2   0x000373    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWUNIH   0x000377    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_DECM   0x000378    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG3   0x000381    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWDECM   0x000385    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_UNIM   0x000386    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG4   0x00038f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWUNIM   0x000393    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_DECS   0x000394    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG5   0x00039d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWDECS   0x0003a1    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+                SHOW_UNIS   0x0003a2    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              ESP_MEDSEG6   0x0003ab    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_SHOWUNIS   0x0003af    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             FUE_TECCLEAR   0x0003b0    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             SAL_BARRETEC   0x0003b3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_DECHRS   0x0003b4    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_DECHRS   0x0003b9    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_DECHRS   0x0003be    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+              BARREDECHRS   0x0003c3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_UNIHRS   0x0003c4    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_UNIHRS   0x0003c9    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_UNIHRS   0x0003ce    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_UNIHRS   0x0003d3    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_UNIHRS   0x0003d8    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_UNIHRS   0x0003dd    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC6_UNIHRS   0x0003e2    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC7_UNIHRS   0x0003e7    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC8_UNIHRS   0x0003ec    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC9_UNIHRS   0x0003f1    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREUNI_HRS   0x0003f6    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_DECMIN   0x0003f7    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_DECMIN   0x0003fc    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_DECMIN   0x000401    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_DECMIN   0x000406    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_DECMIN   0x00040b    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_DECMIN   0x000410    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREDEC_MIN   0x000415    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_UNIMIN   0x000416    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_UNIMIN   0x00041b    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_UNIMIN   0x000420    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_UNIMIN   0x000425    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_UNIMIN   0x00042a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_UNIMIN   0x00042f    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC6_UNIMIN   0x000434    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC7_UNIMIN   0x000439    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC8_UNIMIN   0x00043e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC9_UNIMIN   0x000443    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREUNI_MIN   0x000448    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_DECSEG   0x000449    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_DECSEG   0x00044e    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_DECSEG   0x000453    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_DECSEG   0x000458    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_DECSEG   0x00045d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_DECSEG   0x000462    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREDEC_SEG   0x000467    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC0_UNISEG   0x000468    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC1_UNISEG   0x00046d    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC2_UNISEG   0x000472    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC3_UNISEG   0x000477    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC4_UNISEG   0x00047c    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC5_UNISEG   0x000481    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC6_UNISEG   0x000486    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC7_UNISEG   0x00048b    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC8_UNISEG   0x000490    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+          FUE_TEC9_UNISEG   0x000495    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+             BARREUNI_SEG   0x00049a    program     static E:\AMM\Práctica 2.6\Programa\Teclado.asm
+
+

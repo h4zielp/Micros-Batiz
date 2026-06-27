@@ -1,0 +1,1630 @@
+;--------------------------------------------------------------------------------------------------
+  List    p=16f877A; 
+  #include "c:\Program files (x86)\Microchip\Mpasm Suite\p16f877a.inc";
+  ;#include "C:\Program Files\Microchip\MPASM Suite\P16F877A.INC";                                                       
+ __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_OFF & _XT_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF;
+;--------------------------------------------------------------------------------------------------
+;
+; Fosc = 4 MHz.
+; Ciclo de trabajo del PIC = (1/fosc)*4 = 1 µs.
+; T int =(256-tmr0)*(P)*((1/4000000)*4) = 1 ms.    // Tiempo de interrupción.
+; tmr0=131,  P=8.
+; frec int = 1/ t int = 1 KHz.
+;----------------------------------------------------------------------------------------------------
+;
+;Registros propios de la estructura del programa 
+resp_w			equ 0x20;
+resp_pclath		equ 0x21;
+resp_status		equ 0x22;
+resp_fsr		equ 0x23;
+presc1			equ 0x24;
+presc2			equ 0x25; 
+banderas		equ 0x26;
+cont_milis		equ 0x27;
+cont_medseg		equ 0x28;
+uniseg_bin		equ 0x29;
+decseg_bin		equ 0x30;
+unimin_bin 		equ	0x31;
+decmin_bin		equ	0x32;
+unihrs_bin		equ	0x33;
+dechrs_bin		equ 0x34;
+uniseg_asc		equ 0x35;
+decseg_asc		equ 0x36;
+unimin_asc 		equ	0x37;
+decmin_asc		equ	0x38;
+unihrs_asc		equ	0x39;
+dechrs_asc		equ 0x40;
+val_teclado		equ 0x41;
+val_tecopri		equ 0x42;
+veinte_hrs		equ 0x43;
+prueba			equ 0x44;
+;---------------------------------------------------------------
+;
+;Constantes del programa
+;Constantes de la LCD
+clr_srcn		equ 0x01;
+dig1_LCD		equ 0x80;
+dig5_LCD		equ 0x84;//Variable correspondiente al digito 5 de la LCD
+dig6_LCD		equ 0x85;//Variable correspondiente al digito 6 de la LCD
+dig7_LCD		equ 0x86;//Variable correspondiente al digito 7 de la LCD
+dig8_LCD		equ 0x87;//Variable correspondiente al digito 8 de la LCD
+dig9_LCD		equ 0x88;//Variable correspondiente al digito 9 de la LCD
+dig10_LCD		equ 0x89;//Variable correspondiente al digito 10 de la LCD
+dig11_LCD		equ 0x8a;//Variable correspondiente al digito 11de la LCD
+dig12_LCD		equ 0x8b;//Variable correspondiente al digito 12 de la LCD
+;
+;Constantes del teclado
+;
+No_haytecla equ      0xF0;
+Des_teclado equ      0x0F;
+Tec_1       equ      0xE0;
+Tec_2       equ      0xD0;
+Tec_3       equ      0xB0;
+Tec_A       equ      0x70;
+Tec_4       equ      0xE0;
+Tec_5       equ      0xD0;
+Tec_6       equ      0xB0;
+Tec_B       equ      0x70;
+Tec_7       equ      0xE0;
+Tec_8       equ      0xD0;
+Tec_9       equ      0xB0;
+Tec_C       equ      0x70;
+Tec_clear   equ      0xE0;
+Tec_0       equ      0xD0;
+Tec_#       equ      0x70;
+Tec_D       equ      0x70;
+Tec_at      equ      0x70;
+;
+;Comandos de la LCD
+borra_LCD     equ 0x01;
+;
+;Banderas del registro banderas
+ban_int			equ   .1;
+ban_B			equ	  .2;
+;
+;-------------------------------------------
+;
+;Definición de Puertos de I/O
+;
+;Puerto A
+;
+RS_LCD			equ .0;
+E_LCD			equ .1;
+RA2				equ .2;
+RA3				equ .3;
+RA4				equ .4;
+RA5				equ .5;
+
+proga			equ b'111100';
+;
+;Puerto B.
+Act_Ren1          equ     .0;// Sin uso el puerto B0
+Act_Ren2          equ     .1;// Sin uso el puerto B1
+Act_Ren3          equ     .2;// Sin uso el puerto B2
+Act_Ren4          equ     .3;// Sin uso el puerto B3
+Col_1             equ     .4;// Sin uso el puerto B4
+Col_2             equ     .5;// Sin uso el puerto B5
+Col_3             equ     .6;// Sin uso el puerto B6
+Col_4             equ     .7;// Sin uso el puerto B7
+
+progb			equ b'11110000';
+;
+;Puerto C
+;
+D0_LCD			equ .0;
+D1_LCD 			equ .1;
+D2_LCD 			equ .2;
+D3_LCD 			equ .3;
+D4_LCD			equ .4;
+D5_LCD			equ .5;
+D6_LCD			equ .6;
+D7_LCD			equ .7;
+
+progc			equ b'00000000';
+
+;Puerto E
+;
+Re0				equ .0;
+Re1				equ .1;
+led_osc			equ .2;
+
+proge			equ b'011';
+;
+;----------------------------------------------------------------
+;Vector Reset
+				org 0x0000;
+vec_reset		clrf pclath;
+				goto prog_prin;
+;----------------------------------------------------------------
+;
+;Vector de Interrupción
+				org 0x0004;
+vec_int			movwf resp_w;
+				movf  status,w;
+				movwf resp_status;
+				clrf  status;
+				movf pclath,w;
+                movwf resp_pclath; 
+                clrf pclath; 
+                movf fsr,w;
+                movwf resp_fsr; 		
+				clrf fsr;
+				
+				btfsc intcon,tmr0if;
+				call sbr_int;
+				
+sal_int			movlw .131;
+				movwf tmr0;	
+				movf resp_fsr,w;
+                movwf fsr;
+                movf resp_pclath,w;
+                movwf pclath;
+                movf resp_status,w;
+                movwf status;
+                movf resp_w,w;
+				
+				retfie; 
+;---------------------------------------------------
+;
+;Subrutina de atención a la interrupción 
+;
+sbr_int			incf cont_milis,f;
+				
+				incf presc1,f;
+				movlw .100;
+				subwf presc1,w;
+				btfss status,z;
+				goto sal_sbr;
+				clrf presc1;
+
+				incf presc2,f;
+				movlw .10;
+				subwf presc2,w;
+				btfss status,z;
+				goto sal_sbr;
+				clrf presc1;
+				clrf presc2;
+				clrf cont_medseg;
+						
+				btfss porte,led_osc;
+				goto apaga_led;
+				bcf  porte,led_osc;
+				goto bandera;
+				
+apaga_led		bsf porte,led_osc;
+				
+bandera			incf cont_medseg,f;
+				bsf banderas,ban_int;
+
+sal_sbr  		bcf intcon,t0if;
+				return;
+;-----------------------------------------------------------------------------
+;Subrutina de inicio;
+;
+prog_ini		bsf status,RP0; 
+                movlw 0x02;     
+                movwf option_reg ^0x80; 
+                movlw proga;
+                movwf trisa ^0x80;
+                movlw progb;
+                movwf trisB ^0x80;
+                movlw progC;
+                movwf trisc ^0x80; 
+                movlw progE;
+                movwf trise ^0x80;
+                movlw 0x06;
+                movwf adcon1 ^0x80;
+                bcf status,RP0;   
+                           
+                movlw 0xa0;
+                movwf intcon; // 
+
+                movlw .131;
+                movwf tmr0; //
+
+                clrf banderas; 
+		     	clrf portc;
+		    	movlw 0x03; // 
+		      	movwf porta;
+
+
+                clrf resp_w;      // 
+                clrf resp_status; //
+                clrf resp_pclath;  // 
+                clrf resp_fsr;     // 
+                clrf presc1;     // 
+                clrf presc2;     // 
+                clrf banderas;    // 
+                clrf cont_milis;  // 
+		     	clrf cont_medseg; // 
+	           	clrf uniseg_bin;  // 
+	           	clrf decseg_bin;  // 
+		    	clrf unimin_bin;  // 
+	        	clrf decmin_bin;  // 
+	          	clrf unihrs_bin;  // 
+		        clrf dechrs_bin;  // 
+				clrf veinte_hrs;	//Variable que determina si se ingresó 2 en las decenas de hora
+		       	movlw '0';         // 
+		      	movwf uniseg_asc;// 
+		       	movlw '0';         // 
+		      	movwf decseg_asc;// 
+		       	movlw '0';         // 
+		       	movwf unimin_asc;// 
+		        movlw '0';         // 
+		        movwf decmin_asc;//  
+		        movlw '0';         //
+		        movwf unihrs_asc;// 
+		      	movlw '0';         // 
+		        movwf dechrs_asc;// 
+		
+                return;            
+;-------------------------------------------------------
+;
+;Autómata Principal
+;
+prog_prin		call prog_ini;
+				call ini_lcd;
+
+loop_prin		call show_time;
+				call esp_int;
+				call cuenta_t;
+				call convas;
+
+				goto loop_prin;
+;------------------------------------------------------
+;
+;Inicialización de la LCD
+;
+ini_lcd			bcf porta,RS_LCD; Coloca la LCD en formato comando
+				movlw 0x38;
+		      	movwf portc;
+		      	call pulso_enable;
+		      	movlw 0x0c;
+		    	movwf portc;
+		       	call pulso_enable;
+		      	movlw 0x01;
+		       	movwf portc;
+		     	call pulso_enable;
+		       	movlw 0x06;
+		      	movwf portc;
+		       	call pulso_enable;
+		     	movlw 0x80;
+		     	movwf portc;
+		     	call pulso_enable;
+			
+		      	bsf porta,RS_LCD;
+;-------------------------------------------------------------------------------------------------- 
+;
+;Subrutina de pulso de reloj LCD
+;
+
+pulso_enable		bcf porta,E_LCD;
+		        	call retardo_1ms;
+		         	bsf porta,E_LCD;
+
+		         	call ret_40ms;
+			
+		          	return;
+
+;-------------------------------------------------------------------------------------------------- 
+
+
+                        ;=========================================
+                        ;== Subrutina de retardo de 1 mili segundo==
+                        ;=========================================
+
+retardo_1ms	    	clrf cont_milis;    // Limpia los datos en la variable que cuenta milis
+esp_int1ms	     	movlw .1;           // Asigna el tiempo de retardo
+		        	subwf cont_milis,w;
+		        	btfss status,z;
+		        	goto esp_int1ms;
+
+		         	return;
+
+;-------------------------------------------------------------------------------------------------- 
+
+
+                        ;=========================================
+                        ;== Subrutina de retardo de 40 mili segungo==
+                        ;=========================================
+
+ret_40ms	    	clrf cont_milis;
+esp_int40ms	    	movlw .40;
+					subwf cont_milis,w;
+					btfss status,z;
+		 			goto esp_int40ms;
+			
+					return
+;-------------------------------------------------------------------------------------------------- 
+
+
+
+                        ;=========================================
+                        ;== Subrutina de muestra cuenta  ==
+                        ;=========================================
+
+show_time			bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig12_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movf uniseg_asc,w;
+					movwf portc;
+                    call pulso_enable;
+
+					bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig11_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movf decseg_asc,w;
+					movwf portc;
+                    call pulso_enable;
+					
+
+					bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig10_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw ':'; 
+					movwf portc;
+                    call pulso_enable;
+		
+					bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig9_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movf unimin_asc,w;
+					movwf portc;
+                    call pulso_enable;
+		
+					bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig8_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movf decmin_asc,w;
+					movwf portc;
+                    call pulso_enable;
+			
+					bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig7_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw ':';
+					movwf portc;
+                    call pulso_enable;
+
+					bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig6_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movf unihrs_asc,w;
+					movwf portc;
+                    call pulso_enable;
+			
+					bcf porta,RS_LCD; Coloca la LCD en formato comando
+					movlw dig5_LCD;
+					movwf portc;
+					call pulso_enable;
+					bsf porta,RS_LCD; Coloca la LCD en formato comando
+					movf dechrs_asc,w;
+					movwf portc;
+					call pulso_enable;
+
+			
+			return;
+;-------------------------------------------------------------------------------------------------- 
+;
+;Subrutina de espera de interrupción de 1s
+;
+esp_int                 nop;                   // Perdida de tiempo.
+						call espera_teclado;    // 
+                        btfss banderas,ban_int;// Realiza una combaracion de los bits de las banderas 
+                        goto esp_int;          // Salta al inicio de la misma subrutina
+                        bcf banderas,ban_int;  // Limpia el bit file de la bandera
+
+                        return;                // Regresa al programa principal
+;-------------------------------------------------------------------------------------------------- 
+;
+;Subrutina de cuenta tiempo
+;
+cuenta_t			incf uniseg_bin,f;  // Incrementa en 1 las unidades de segundo
+					movlw .10;          // Establece el valor para contar hasta 10 en las unidades de segundo
+					subwf uniseg_bin,w; //Resta w de f en la variable actual para la siguiente instruccion.
+					btfss status,z;     //Comprueba el estado del bit de la bandera y salta si se prende cuando llegue a 10
+					goto sal_cuentat; //Sale de la subrutina actual
+					clrf uniseg_bin;    //Lmpia los datos de la variable de las unidades de segundo.
+
+					incf decseg_bin,f; // Incrementa en 1 las decenas de segundo
+					movlw .6;          // Establece el valor para contar hasta 6 en las decenas de sugundo
+					subwf decseg_bin,w;//Resta w de f en la variable actual para la siguiente instruccion.
+					btfss status,z;    //Comprueba el estado del bit de la bandera y salta si se prende cuando llegue a 6
+					goto sal_cuentat;//Sale de la subrutina actual
+					clrf uniseg_bin;   //Lmpia los datos de la variable de las unidades de segundo.
+                    clrf decseg_bin;   //Lmpia los datos de la variable de las decenas de segundo.
+
+					incf unimin_bin,f; // Incrementa en 1 las unidades de minuto
+					movlw .10;         // Establece el valor para contar hasta 10 en las unidades de minuto
+					subwf unimin_bin,w;//Resta w de f en la variable actual para la siguiente instruccion.
+					btfss status,z;    //Comprueba el estado del bit de la bandera y salta si se prende cuando llegue a 10
+					goto sal_cuentat;//Sale de la subrutina actual
+					clrf unimin_bin;   //Lmpia los datos de la variable de las unidades de minuto
+					clrf uniseg_bin;   //Lmpia los datos de la variable de las unidades de segundo.
+                    clrf decseg_bin;   //Lmpia los datos de la variable de las decenas de segundo.
+
+					incf decmin_bin,f; // Incrementa en 1 las decenas de minuto
+					movlw .6;          // Establece el valor para contar hasta 6 en las decenas de minuto
+					subwf decmin_bin,w;//Resta w de f en la variable actual para la siguiente instruccion.
+					btfss status,z;    //Comprueba el estado del bit de la bandera y salta si se prende cuando llegue a 6
+					goto sal_cuentat;//Sale de la subrutina actual
+                 	clrf unimin_bin;   //Lmpia los datos de la variable de las unidades de minuto
+					clrf decmin_bin;   //Lmpia los datos de la variable de las decenas de minuto
+                    clrf decseg_bin;   //Lmpia los datos de la variable de las decenas de segundo.
+					clrf uniseg_bin;   //Lmpia los datos de la variable de las unidades de segundo.
+					incf unihrs_bin,f;
+
+					movlw .2;
+					xorwf dechrs_bin,w;
+					btfsc status,z;
+					goto veinte_horas;
+
+diez_horas			movlw .10;
+					subwf unihrs_bin,w;
+					btfss status,z;
+					goto sal_cuentat
+					clrf unimin_bin;   //Lmpia los datos de la variable de las unidades de minuto
+					clrf decmin_bin;   //Lmpia los datos de la variable de las decenas de minuto
+					clrf unihrs_bin;   //Lmpia los datos de la variable de las unidades de segundo.
+                    clrf decseg_bin;   //Lmpia los datos de la variable de las decenas de segundo.
+					clrf unihrs_bin;
+					incf dechrs_bin,f;
+					
+					movlw .2;
+					subwf dechrs_bin,w;
+					btfss status,z;
+					goto sal_cuentat;
+					clrf unimin_bin;   //Lmpia los datos de la variable de las unidades de minuto
+					clrf decmin_bin;   //Lmpia los datos de la variable de las decenas de minuto
+					clrf uniseg_bin;   //Lmpia los datos de la variable de las unidades de segundo.
+                    clrf decseg_bin;   //Lmpia los datos de la variable de las decenas de segundo.
+					clrf unihrs_bin;   //Limpia los datos de la variable de las unidades de segundo
+					goto sal_cuentat;
+
+veinte_horas		movlw .4;
+					subwf unihrs_bin,w;
+					btfss status,z;
+					goto sal_cuentat
+					
+					clrf unihrs_bin;   //Limpia los dstos de la variable de las unidades de hora
+					clrf dechrs_bin;   //Limpia los datos de la variable de las decenas de hora
+					clrf unimin_bin;   //Lmpia los datos de la variable de las unidades de minuto
+					clrf decmin_bin;   //Lmpia los datos de la variable de las decenas de minuto
+					clrf uniseg_bin;   //Lmpia los datos de la variable de las unidades de segundo.
+                    clrf decseg_bin;   //Lmpia los datos de la variable de las decenas de segundo.
+
+sal_cuentat			return;           // Regresa al programa principal
+;------------------------------------------------------------------------------------------------
+;
+;Subrutina de conversión de binario a código ASCII
+;
+
+convas				movlw '0'; //0 en ascii
+					addwf unihrs_bin,w;//Agrega el caracter 0 guardado en w en la variable de unidades de horas
+					movwf unihrs_asc;//Convierte al correspondiente en ascci
+
+					movlw '0'; //0 en ascii
+					addwf dechrs_bin,w;//Agrega el caracter 0 guardado en w en la variable de decenas de horas
+					movwf dechrs_asc;//Convierte al correspondiente en ascci
+
+					movlw '0'; //0 en ascii
+    	    	    addwf uniseg_bin,w;//Agrega el caracter 0 guardado en w en la variable de unidades de segundo
+					movwf uniseg_asc;//Convierte al correspondiente en ascci
+ 
+		           	movlw '0'; //0 en ascii
+                    addwf decseg_bin,w; //Agrega el caracter 0 guardado en w en la variable de decenas de segundo
+	         		movwf decseg_asc; //Convierte al correspondiente en ascci
+
+		        	movlw '0'; //0 en ascii
+					addwf unimin_bin,w;//Agrega el caracter 0 guardado en w en la variable de unidades de minutos
+					movwf unimin_asc;//Convierte al correspondiente en ascci
+
+					movlw '0'; //0 en ascii
+					addwf decmin_bin,w;//Agrega el caracter 0 guardado en w en la variable de decenas de minutos
+					movwf decmin_asc;//Convierte al correspondiente en ascci
+
+			
+					return;  
+;--------------------------------------------------------------
+;
+;Subrutina de lectura de entrada a la actualización del tiempo
+;
+espera_teclado		movlw 0X0F;
+					movwf portb;
+					nop;
+					bcf portb,Act_Ren1;
+					movf portb,w;
+					movwf Val_teclado;
+					movlw 0xF0;
+                	andwf Val_teclado,f;
+					movlw Tec_at;
+					subwf Val_teclado,w;
+					btfss status,Z;
+					goto sal_waitkey;
+					call actualizaT;
+ 					
+					movlw 0X0F;
+					movwf portb;
+					bcf portb,Act_Ren2;
+espera_out			movf portb,w;
+					movwf Val_teclado;
+					movlw 0xF0;
+					andwf Val_teclado,f;
+					movlw Tec_#;
+					subwf Val_teclado,f;
+					btfss status,z;
+					goto espera_out;
+					
+sal_waitkey			return;
+;---------------------------------------------------------------
+;
+;Subrutina de actualización del tiempo 
+;
+actualizaT			;call limpia_dis;
+					call barredec_hrs;
+					call show_dechrs;
+					call barre_unihrs;
+					call show_unihrs;
+					call barre_decm;
+					call show_decm;
+					call barre_unim;
+					call show_unim;
+					call barre_decs;
+					call show_decs;
+					call barre_unis;
+					call show_unis;
+					
+					return;
+;---------------------------------------------------------------
+;
+;Subrutina que lee las decenas de hora
+;
+barredec_hrs	movlw 0X0F;
+				movwf portb; 
+		      	nop;
+		      	bcf portb,Act_Ren1;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+           		andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren2_dh;
+
+				movlw Tec_1;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec1_dechrs;
+
+				movlw Tec_2;
+				subwf Val_teclado,w;
+				btfsc status,Z;	
+				goto Fue_Tec2_dechrs;
+
+sig_Ren2_dh		bsf portb,Act_Ren1;
+				nop;
+                bcf portb,Act_Ren2;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren3_dh;	
+
+sig_Ren3_dh		bsf portb,Act_Ren2;
+				nop;      
+				bcf portb,Act_Ren3;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren4_dh;
+				
+sig_ren4_dh		bsf portb,Act_Ren3;
+				nop;      
+				bcf portb,Act_Ren4;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto barredec_hrs;
+
+				movlw Tec_0;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec0_dechrs;
+				goto barredec_hrs;
+;-------------------------------------------------------------------------------------------------- 
+;
+;Subrutina que lee las unidades de hora de 20 a 24 horas
+;
+barre_unihrs	movlw .2;
+				xorwf dechrs_bin,w;
+				btfss status,z;
+				goto diezhrs;
+				goto veintehrs;
+			
+diezhrs		    goto barre_unih;
+
+veintehrs		movlw 0x0F;
+				movwf portb; 
+		      	nop;
+		      	bcf portb,Act_Ren1;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren22;
+
+				movlw Tec_1;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec1_unihrs;
+
+				movlw Tec_2;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec2_unihrs;
+
+				movlw Tec_3;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec3_unihrs;
+
+sig_Ren22		bsf portb,Act_Ren1;
+				nop;
+                bcf portb,Act_Ren2;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren32;	
+
+sig_Ren32		bsf portb,Act_Ren2;
+				nop;      
+				bcf portb,Act_Ren3;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren42;
+				
+sig_Ren42		bsf portb,Act_Ren3;
+				nop;      
+				bcf portb,Act_Ren4;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto veintehrs;
+
+				movlw Tec_0;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec0_unihrs;
+				goto veintehrs;
+;----------------------------------------------------------------------------------------
+;
+;Subrutina que lee las unidades de hora de 0 a 19 horas
+;
+barre_unih		movlw 0X0F;
+				movwf portb; 
+		      	nop;
+		      	bcf portb,Act_Ren1;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+           		andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren2_uh;
+
+				movlw Tec_1;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec1_unihrs;
+
+				movlw Tec_2;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec2_unihrs;
+
+				movlw Tec_3;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec3_unihrs;
+
+sig_Ren2_uh		bsf portb,Act_Ren1;
+				nop;
+                bcf portb,Act_Ren2;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren3_uh;
+
+				movlw Tec_4;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec4_unihrs;
+
+				movlw Tec_5;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec5_unihrs;
+
+				movlw Tec_6;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec6_unihrs;
+
+sig_Ren3_uh		bsf portb,Act_Ren2;
+				nop;      
+				bcf portb,Act_Ren3;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren4_uh;
+
+				movlw Tec_7;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec7_unihrs;
+
+				movlw Tec_8;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec8_unihrs;
+
+				movlw Tec_9;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec9_unihrs;
+
+sig_Ren4_uh		bsf portb,Act_Ren3;
+				nop;
+				bcf portb,Act_Ren4;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+				andwf Val_teclado,f;
+				movlw No_haytecla;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto barre_unih;
+			
+				movlw Tec_0;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec0_unihrs;
+				goto barre_unih;
+;--------------------------------------------------------------------------------------------
+;
+;Subrutina que lee las decenas de minuto
+;
+barre_decm		movlw 0X0F;
+				movwf portb; 
+		      	nop;
+		      	bcf portb,Act_Ren1;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+           		andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren2_dm;
+
+				movlw Tec_1;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec1_decmin;
+
+				movlw Tec_2;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec2_decmin;
+
+				movlw Tec_3;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec3_decmin;
+
+sig_Ren2_dm		bsf portb,Act_Ren1;
+				nop;
+                bcf portb,Act_Ren2;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren3_dm;
+
+				movlw Tec_4;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec4_decmin;
+
+				movlw Tec_5;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec5_decmin;
+
+sig_Ren3_dm		bsf portb,Act_Ren2;
+				nop;      
+				bcf portb,Act_Ren3;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren4_dm;
+
+sig_Ren4_dm		bsf portb,Act_Ren3;
+				nop;
+				bcf portb,Act_Ren4;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+				andwf Val_teclado,f;
+				movlw No_haytecla;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto barre_decm;
+			
+				movlw Tec_0;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec0_decmin;
+				goto barre_decm;
+			
+;------------------------------------------------------------------------------------------
+;
+;Subrutina que lee las unidades de minuto
+;
+barre_unim		movlw 0X0F;
+				movwf portb; 
+		      	nop;
+		      	bcf portb,Act_Ren1;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+           		andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren2_um;
+
+				movlw Tec_1;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec1_unimin;
+
+				movlw Tec_2;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec2_unimin;
+
+				movlw Tec_3;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec3_unimin;
+
+sig_Ren2_um		bsf portb,Act_Ren1;
+				nop;
+                bcf portb,Act_Ren2;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren3_um;
+
+				movlw Tec_4;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec4_unimin;
+
+				movlw Tec_5;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec5_unimin;
+
+				movlw Tec_6;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec6_unimin;
+
+sig_Ren3_um		bsf portb,Act_Ren2;
+				nop;      
+				bcf portb,Act_Ren3;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren4_um;
+
+				movlw Tec_7;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec7_unimin;
+
+				movlw Tec_8;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec8_unimin;
+
+				movlw Tec_9;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec9_unimin;
+
+sig_Ren4_um		bsf portb,Act_Ren3;
+				nop;
+				bcf portb,Act_Ren4;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+				andwf Val_teclado,f;
+				movlw No_haytecla;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto barre_unim;
+			
+				movlw Tec_0;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec0_unimin;
+				goto barre_unim;
+;--------------------------------------------------------------------------------------------
+;
+;Subrutina que lee las decenas de segundo
+;
+barre_decs		movlw 0X0F;
+				movwf portb; 
+		      	nop;
+		      	bcf portb,Act_Ren1;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+           		andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren2_ds;
+
+				movlw Tec_1;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec1_decseg;
+
+				movlw Tec_2;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec2_decseg;
+
+				movlw Tec_3;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec3_decseg;
+
+sig_Ren2_ds		bsf portb,Act_Ren1;
+				nop;
+                bcf portb,Act_Ren2;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren3_ds;
+
+				movlw Tec_4;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec4_decseg;
+
+				movlw Tec_5;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec5_decseg;
+
+sig_Ren3_ds		bsf portb,Act_Ren2;
+				nop;      
+				bcf portb,Act_Ren3;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren4_ds;
+
+
+sig_Ren4_ds		bsf portb,Act_Ren3;
+				nop;
+				bcf portb,Act_Ren4;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+				andwf Val_teclado,f;
+				movlw No_haytecla;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto barre_decs;
+			
+				movlw Tec_0;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec0_decseg;
+				goto barre_decs;
+			
+;------------------------------------------------------------------------------------------
+;
+;Subrutina que lee las unidades de segundo
+;
+barre_unis		movlw 0X0F;
+				movwf portb; 
+		      	nop;
+		      	bcf portb,Act_Ren1;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+           		andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren2_us;
+
+				movlw Tec_1;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec1_uniseg;
+
+				movlw Tec_2;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec2_uniseg;
+
+				movlw Tec_3;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec3_uniseg;
+
+sig_Ren2_us		bsf portb,Act_Ren1;
+				nop;
+                bcf portb,Act_Ren2;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren3_us;
+
+				movlw Tec_4;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec4_uniseg;
+
+				movlw Tec_5;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec5_uniseg;
+
+				movlw Tec_6;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec6_uniseg;
+
+sig_Ren3_us		bsf portb,Act_Ren2;
+				nop;      
+				bcf portb,Act_Ren3;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+                andwf Val_teclado,f;
+				movlw No_haytecla;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto sig_Ren4_us;
+
+				movlw Tec_7;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec7_uniseg;
+
+				movlw Tec_8;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec8_uniseg;
+
+				movlw Tec_9;
+				subwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec9_uniseg;
+
+sig_Ren4_us		bsf portb,Act_Ren3;
+				nop;
+				bcf portb,Act_Ren4;
+				movf portb,w;
+				movwf Val_teclado;
+				movlw 0xF0;
+				andwf Val_teclado,f;
+				movlw No_haytecla;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto barre_unis;
+			
+				movlw Tec_0;
+				xorwf Val_teclado,w;
+				btfsc status,Z;
+				goto Fue_Tec0_uniseg;
+				goto barre_unis;
+;--------------------------------------------------------------------------------------------
+;
+;Subrutina de actualización de decenas de hora
+;
+
+show_dechrs		bcf porta,RS_LCD;
+				movlw dig5_lcd;
+				movwf portc;
+				call pulso_enable;
+				bsf porta,RS_LCD;
+				movf Val_tecopri,w;
+				movwf portc;
+				call pulso_Enable; 
+				clrf cont_medseg;
+
+esp_medseg1		movlw .1;
+				subwf cont_medseg,w;
+				btfss status,Z;
+				goto esp_medseg1;
+
+sal_showdech    return;
+;-------------------------------------------------------------------------
+;
+;Subrutina de actualización de unidades de hora
+;
+show_unihrs		bcf porta,RS_LCD;
+				movlw dig6_LCD;
+				movwf portc;
+				call pulso_enable;
+				bsf porta,RS_LCD;
+				movf Val_tecopri,w;
+				movwf portc;
+				call pulso_Enable;
+				clrf cont_medseg;
+
+esp_medseg2		movlw .1;
+				subwf cont_medseg,w;
+				btfss status,Z;
+				goto esp_medseg2;
+
+sal_showunih    return;
+;-----------------------------------------------------------------------------------
+;
+;Subrutina de actualización de decenas de minuto
+;
+show_decm		bcf porta,RS_LCD;
+				movlw dig8_lcd;
+				movwf portc;
+				call pulso_enable;
+				bsf porta,RS_LCD;
+				movf Val_tecopri,w;
+				movwf portc;
+				call pulso_Enable; 
+				clrf cont_medseg;
+
+esp_medseg3		movlw .1;
+				subwf cont_medseg,w;
+				btfss status,Z;
+				goto esp_medseg3;
+
+sal_showdecm    return;
+;-------------------------------------------------------------------------
+;
+;Subrutina de actualización de unidades de minuto
+;
+show_unim		bcf porta,RS_LCD;
+				movlw dig9_LCD;
+				movwf portc;
+				call pulso_enable;
+				bsf porta,RS_LCD;
+				movf Val_tecopri,w;
+				movwf portc;
+				call pulso_Enable;
+				clrf cont_medseg;
+
+esp_medseg4		movlw .1;
+				subwf cont_medseg,w;
+				btfss status,Z;
+				goto esp_medseg4;
+
+sal_showunim    return;
+;-----------------------------------------------------------------------------------
+;
+;Subrutina de actualización de decenas de segundo
+;
+show_decs		bcf porta,RS_LCD;
+				movlw dig11_lcd;
+				movwf portc;
+				call pulso_enable;
+				bsf porta,RS_LCD;
+				movf Val_tecopri,w;
+				movwf portc;
+				call pulso_Enable; 
+				clrf cont_medseg;
+
+esp_medseg5		movlw .1;
+				subwf cont_medseg,w;
+				btfss status,Z;
+				goto esp_medseg5;
+
+sal_showdecs    return;
+;-------------------------------------------------------------------------
+;
+;Subrutina de actualización de unidades de segundo
+;
+show_unis		bcf porta,RS_LCD;
+				movlw dig12_LCD;
+				movwf portc;
+				call pulso_enable;
+				bsf porta,RS_LCD;
+				movf Val_tecopri,w;
+				movwf portc;
+				call pulso_Enable;
+				clrf cont_medseg;
+
+esp_medseg6		movlw .1;
+				subwf cont_medseg,w;
+				btfss status,Z;
+				goto esp_medseg6;
+
+sal_showunis    return;
+;-----------------------------------------------------------------------------------
+Fue_TecClear	movlw ' ';
+				movwf Val_tecopri;
+				goto sal_barretec;
+
+sal_barretec    return;
+;-----------------------------------------------------------------------------------
+Fue_Tec0_dechrs	movlw '0';
+				movwf Val_tecopri;
+				movlw .0;
+				movwf dechrs_bin;
+				goto barredechrs;
+
+Fue_Tec1_dechrs	movlw '1';
+				movwf Val_tecopri;
+				movlw .1;
+				movwf dechrs_bin;
+				goto barredechrs;
+
+Fue_Tec2_dechrs	movlw '2';
+				movwf Val_tecopri;
+				movlw .2;
+				movwf dechrs_bin;
+				goto barredechrs;
+
+barredechrs	return;
+;----------------------------------------------------------------------------------
+Fue_Tec0_unihrs	movlw '0';
+				movwf Val_tecopri;
+				movlw .0;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec1_unihrs	movlw '1';
+				movwf Val_tecopri;
+                movlw .1;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec2_unihrs	movlw '2';
+				movwf Val_tecopri;
+                movlw .2;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec3_unihrs	movlw '3';
+				movwf Val_tecopri;
+                movlw .3;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec4_unihrs	movlw '4';
+				movwf Val_tecopri;
+                movlw .4;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec5_unihrs	movlw '5';
+				movwf Val_tecopri;
+                movlw .5;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec6_unihrs	movlw '6';
+				movwf Val_tecopri;
+                movlw .6;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec7_unihrs	movlw '7';
+				movwf Val_tecopri;
+                movlw .7;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec8_unihrs	movlw '8';
+				movwf Val_tecopri;
+                movlw .8;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+Fue_Tec9_unihrs	movlw '9';
+				movwf Val_tecopri;
+                movlw .9;
+				movwf unihrs_bin;
+				goto barreuni_hrs;
+
+barreuni_hrs	return;
+;--------------------------------------------------------------------------
+Fue_Tec0_decmin	movlw '0';
+				movwf Val_tecopri;
+				movlw .0;
+				movwf decmin_bin;
+				goto barredec_min;
+
+Fue_Tec1_decmin	movlw '1';
+				movwf Val_tecopri;
+                movlw .1;
+				movwf decmin_bin;
+				goto barredec_min;
+
+Fue_Tec2_decmin	movlw '2';
+				movwf Val_tecopri;
+                movlw .2;
+				movwf decmin_bin;
+				goto barredec_min;
+
+Fue_Tec3_decmin	movlw '3';
+				movwf Val_tecopri;
+                movlw .3;
+				movwf decmin_bin;
+				goto barredec_min;
+
+Fue_Tec4_decmin	movlw '4';
+				movwf Val_tecopri;
+                movlw .4;
+				movwf decmin_bin;
+				goto barredec_min;
+
+Fue_Tec5_decmin	movlw '5';
+				movwf Val_tecopri;
+                movlw .5;
+				movwf decmin_bin;
+				goto barredec_min;
+
+barredec_min	return;
+;--------------------------------------------------------------------------------
+Fue_Tec0_unimin	movlw '0';
+				movwf Val_tecopri;
+				movlw .0;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec1_unimin	movlw '1';
+				movwf Val_tecopri;
+                movlw .1;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec2_unimin	movlw '2';
+				movwf Val_tecopri;
+                movlw .2;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec3_unimin	movlw '3';
+				movwf Val_tecopri;
+                movlw .3;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec4_unimin	movlw '4';
+				movwf Val_tecopri;
+                movlw .4;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec5_unimin	movlw '5';
+				movwf Val_tecopri;
+                movlw .5;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec6_unimin	movlw '6';
+				movwf Val_tecopri;
+                movlw .6;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec7_unimin	movlw '7';
+				movwf Val_tecopri;
+                movlw .7;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec8_unimin	movlw '8';
+				movwf Val_tecopri;
+                movlw .8;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+Fue_Tec9_unimin	movlw '9';
+				movwf Val_tecopri;
+                movlw .9;
+				movwf unimin_bin;
+				goto barreuni_min;
+
+barreuni_min	return;
+;---------------------------------------------------------------------------------
+
+Fue_Tec0_decseg	movlw '0';
+				movwf Val_tecopri;
+				movlw .0;
+				movwf decseg_bin;
+				goto barredec_seg;
+
+Fue_Tec1_decseg	movlw '1';
+				movwf Val_tecopri;
+                movlw .1;
+				movwf decseg_bin;
+				goto barredec_seg;
+
+Fue_Tec2_decseg	movlw '2';
+				movwf Val_tecopri;
+                movlw .2;
+				movwf decseg_bin;
+				goto barredec_seg;
+
+Fue_Tec3_decseg	movlw '3';
+				movwf Val_tecopri;
+                movlw .3;
+				movwf decseg_bin;
+				goto barredec_seg;
+
+Fue_Tec4_decseg	movlw '4';
+				movwf Val_tecopri;
+                movlw .4;
+				movwf decseg_bin;
+				goto barredec_seg;
+
+Fue_Tec5_decseg	movlw '5';
+				movwf Val_tecopri;
+                movlw .5;
+				movwf decseg_bin;
+				goto barredec_seg;
+
+barredec_seg	return;
+;-----------------------------------------------------------------------------
+Fue_Tec0_uniseg	movlw '0';
+				movwf Val_tecopri;
+				movlw .0;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec1_uniseg	movlw '1';
+				movwf Val_tecopri;
+                movlw .1;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec2_uniseg	movlw '2';
+				movwf Val_tecopri;
+                movlw .2;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec3_uniseg	movlw '3';
+				movwf Val_tecopri;
+                movlw .3;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec4_uniseg	movlw '4';
+				movwf Val_tecopri;
+                movlw .4;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec5_uniseg	movlw '5';
+				movwf Val_tecopri;
+                movlw .5;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec6_uniseg	movlw '6';
+				movwf Val_tecopri;
+                movlw .6;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec7_uniseg	movlw '7';
+				movwf Val_tecopri;
+                movlw .7;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec8_uniseg	movlw '8';
+				movwf Val_tecopri;
+                movlw .8;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+Fue_Tec9_uniseg	movlw '9';
+				movwf Val_tecopri;
+                movlw .9;
+				movwf uniseg_bin;
+				goto barreuni_seg;
+
+barreuni_seg	return;
+;----------------------------------------------------------------------------
+ end

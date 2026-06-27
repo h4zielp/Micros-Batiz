@@ -1,0 +1,792 @@
+;INSTITUTO POLITECNICO NACIONAL.
+;CECYT 9 JUAN DE DIOS BATIZ.
+;
+;PRÁCTICA 2: MULTIPLEXADO "MANEJO DE UN TECLADO MATRICIAL DE 4X4" (ACTUALIZACIÓN DE TIEMPO)
+;
+;GRUPO: 6IM1.
+;
+;Equipo 4
+;
+;INTEGRANTES
+;1.-Campos Contreras.
+;2.-Delgado Aniceto.
+;3.-García Antonio.
+;4.-Madrigal Jiménez.
+;
+;ESTE PROGRAMA MOSTRARÁ UN RELOJ DE TIEMPO REAL CON FORMATO MILITAR CUYA HORA PUEDE SER INTERRUMPIDA PARA SER ACTUALIZADA Y POSTERIORMENTE SER REANUDADA.
+;
+;--------------------------------------------------------------------------------------------------
+ List    p=16f877A; 
+ #include "c:\Program files (x86)\Microchip\Mpasm Suite\p16f877a.inc";                                                     
+ __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_OFF & _XT_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF;
+;--------------------------------------------------------------------------------------------------
+;Fosc = 4 MHz.
+;Ciclo de trabajo del PIC = (1/fosc)*4 = 1 µs.
+;T int =(256-tmr0)*(P)*((1/4000000)*4) = 1 ms.    // Tiempo de interrupción.
+;tmr0=2,  P=8.
+;frec int = 1/ t int = 1 KHz.
+;----------------------------------------------------------------------------------------------------
+;
+;Registros de propósito general Banco 0 de memoria RAM
+;
+;Registros propios de estructura del programa
+
+resp_w          equ 0x20;
+resp_status     equ 0x21;
+res_pclath      equ 0x22; 
+res_fsr         equ 0x23;   
+presc_1         equ 0x24;            .001   100         10 
+presc_2         equ 0x25; t int = t intb * presc_1 * presc_2
+banderas        equ 0x26;
+cont_milis      equ 0x27;
+cont_medseg	equ 0x28;	
+Var_teclado	equ 0x29;
+Var_tecopri	equ 0x2a;
+
+;---------------------------------------------------------------------------------------------------
+
+;Def. de constantes a utilizar.
+uni_seg 	equ 0x2b;
+dec_seg 	equ 0x2c;
+uni_min 	equ 0x2d;
+dec_min 	equ 0x2e;
+uni_hor 	equ 0x2f;
+dec_hor 	equ 0x30;
+uni_seg_Ascii 	equ 0x31;
+dec_seg_Ascii 	equ 0x32;
+uni_min_Ascii 	equ 0x33;
+dec_min_Ascii 	equ 0x34;
+uni_hor_Ascii 	equ 0x35;
+dec_hor_Ascii 	equ 0x36;
+dig1_LCD      	equ 0x80;
+dig5_LCD      	equ 0x84;
+dig8_LCD      	equ 0x87;
+dig11_LCD     	equ 0x8a;
+
+;---------------------------------------------------------------------------------------------------
+
+;Comandos de la LCD
+borra_LCD	equ 0x01;
+
+;---------------------------------------------------------------------------------------------------
+
+;Constantes del Teclado.
+No_haytecla	equ 0xF0;
+Des_teclado	equ 0x0F;
+
+Tec_7		equ 0xE0;
+Tec_8		equ 0xD0;
+Tec_9		equ 0xB0;
+Tec_A		equ 0x70;
+
+Tec_4		equ 0xE0;
+Tec_5		equ 0xD0;
+Tec_6		equ 0xB0;
+Tec_B		equ 0x70;
+
+Tec_1		equ 0xE0;
+Tec_2		equ 0xD0;
+Tec_3		equ 0xB0;
+Tec_C		equ 0x70;
+
+Tec_mul		equ 0xE0;
+Tec_0		equ 0xD0;
+Tec_gato	equ 0xB0;
+Tec_D		equ 0x70;
+
+;---------------------------------------------------------------------------------------------------
+
+;Banderas del registro banderas.
+ban_int       	equ     .0;
+sin_bd1       	equ     .1; 
+sin_bd2       	equ     .2; 
+sin_bd3       	equ     .3; 
+sin_bd4       	equ     .4; 
+sin_bd5       	equ     .5; 
+sin_bd6       	equ     .6; 
+sin_bd7       	equ     .7; 
+
+;---------------------------------------------------------------------------------------------------
+
+;Asignación de los bits de los puertos de I/0.
+
+;Puerto A.
+RS_LCD		equ .0; // Señal de control control Comando Comando o dato de la LCD.
+Enable_LCD  	equ .1; // Señal de ingreso ingreso de informacion informacion a la LCD.
+Sin_UsoRA2 	equ .2; // Sin Uso RA2.
+Sin_UsoRA3	equ .3; // Sin Uso RA3.
+Sin_UsoRA4 	equ .4; // Led de op.
+Sin_UsoRA5	equ .5; // Sin Uso RA5.
+
+proga equ b'101100';Def. la config. de los bits del pto. a.
+
+;Puerto B.
+Act_Ren1      	equ     .0;
+Act_Ren2      	equ     .1;
+Act_Ren3      	equ     .2;
+Act_Ren4      	equ     .3;
+Col_1      	equ     .4;
+Col_2      	equ     .5;
+Col_3      	equ     .6;
+Col_4      	equ     .7;
+
+progb equ b'00000000'; // Programación inicial del puerto B.
+
+;Puerto C.
+D0_LCD equ .0; // Bit D0 de la LCD.
+D1_LCD equ .1; // Bit D1 de la LCD.
+D2_LCD equ .2; // Bit D2 de la LCD.
+D3_LCD equ .3; // Bit D3 de la LCD.
+D4_LCD equ .4; // Bit D4 de la LCD.
+D5_LCD equ .5; // Bit D5 de la LCD.
+D6_LCD equ .6; // Bit D6 de la LCD.
+D7_LCD equ .7; // Bit D7 de la LCD
+
+progc equ b'00000000'; // Programación inicial del puerto C
+
+;Puerto D.
+Sin_UsoRD0              equ     .0;
+Sin_UsoRD1              equ     .1;
+Sin_UsoRD2              equ     .2;
+Sin_UsoRD3              equ     .3;
+Sin_UsoRD4              equ     .4;
+Sin_UsoRD5              equ     .5;
+Sin_UsoRD6              equ     .6;
+Sin_UsoRD7              equ     .7;
+
+progd equ b'11111111'; // Programación inicial del puerto D
+
+;Puerto E.
+Sin_UsoRE0              equ     .0;
+Sin_UsoRE1              equ     .1;
+Led_Op                  equ     .2;
+
+proge equ b'011'; // Programación inicial del puerto E
+
+;-------------------------------------------------------------------------------------------------
+      
+			;==================
+			;== Vector Reset ==
+			;==================
+			org 0x0000;
+vec_reset	clrf pclath;
+			goto prog_prin;
+
+;-------------------------------------------------------------------------------------------------
+                  
+			;==========================
+			;=Vector de Interrupciones=
+			;==========================
+			org 0x0004;   
+vec_int		movwf resp_w;resp. esl estado del reg. w. 
+ 			movf status,w;
+			movwf resp_status;resp. banderas de la alu.
+			clrf status;
+			movf pclath,w;
+			movwf res_pclath;
+			clrf pclath;
+			movf fsr,w;
+			movwf res_fsr; 
+                         
+			btfsc intcon,t0if;
+			call rutina_int;
+                        
+sal_int		movlw .131;
+			movwf tmr0;
+			movf res_fsr,w;
+			movwf fsr;
+			movf res_pclath,w;
+			movwf pclath;
+			movf resp_status,w;
+			movwf status;
+			movf resp_w,w;
+                        
+			retfie;
+
+;--------------------------------------------------------------------------------------------------
+
+			;===============================
+			;==Subrutina de Interrupciones==
+			;===============================
+
+rutina_int	incf cont_milis,f;
+			;			   							100        5
+			incf presc_1,f;		t int = t intb * presc_1 * presc_2
+			movlw .100;
+			xorwf presc_1,w;
+			btfsc status,z;
+			goto sig_int;
+			goto sal_rutint;
+
+
+sig_int		clrf presc_1;
+			incf presc_2,f;
+			movlw .5;
+			xorwf presc_2,w;
+			btfss status,z;
+			goto sal_rutint;
+			clrf presc_1;
+			clrf presc_2;
+			
+			incf cont_medseg,f;
+			btfss porte,Led_Op;
+			goto sec_led;
+			bcf porte,Led_Op; Prende el LED
+			goto sal_rutint;
+sec_led		bsf porte,Led_Op; Apaga el LED
+                        
+sal_rutext	bsf banderas,ban_int;
+                                 
+sal_rutint	bcf intcon,t0if;
+			return;
+
+;--------------------------------------------------------------------------------------------------
+
+                     ;===================================
+                     ;=Subrutina de Ini. de Reg. del Pic=
+                     ;===================================
+prog_ini	bsf status,RP0; Ponte en el banco 1 de ram.
+			movlw 0x02;
+			movwf option_reg ^0x80; 
+			movlw progA;
+			movwf trisa ^0x80;
+			movlw progb;
+			movwf trisB ^0x80;
+			movlw progC;
+			movwf trisc ^0x80; 
+			movlw progD;
+			movwf trisd ^0x80;
+			movlw progE;
+			movwf trise ^0x80;
+			movlw 0x06;
+			movwf adcon1 ^0x80;
+			bcf status,RP0; Ponte en el banco 0 de ram.      
+                           
+			movlw 0xa0;
+			movwf intcon;
+
+			movlw .131;
+			movwf tmr0;
+
+			clrf banderas; 
+			clrf portc;
+			movlw 0x03;
+			movwf porta;
+
+			movlw Des_teclado;
+			movwf portb;
+
+			clrf resp_w;
+			clrf resp_status;
+			clrf res_pclath;
+			clrf res_fsr;
+			clrf presc_1;
+			clrf presc_2;
+			clrf banderas;
+			clrf cont_milis;
+			clrf cont_medseg;
+			clrf uni_seg;
+			clrf dec_seg;
+			clrf uni_min;
+			clrf dec_min;
+			clrf uni_hor;
+			clrf dec_hor;
+			return;
+
+;--------------------------------------------------------------------------------------------------
+
+			;======================
+			;==Programa principal==
+			;======================
+
+prog_prin	call prog_ini;
+			call ini_lcd;
+			call ini_time;
+
+Loop_prin	call esp_int;
+			call Cuenta_tiempo;
+			call Arma_tiempo;
+			call Muestra_tiempo;
+			call barre_teclado;
+			call muestra_tecla;
+			
+			goto Loop_prin;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;=========================================
+			;==Subrutina de inicialización de la LCD==
+			;=========================================
+ini_lcd		bcf porta,RS_LCD; coloca la lcd en formato formato comandos
+
+			movlw 0x38;
+			movwf portc;
+			call pulso_enable;
+
+			movlw 0x0c;
+			movwf portc;
+			call pulso_enable;
+
+			movlw 0x01;
+			movwf portc;
+			call pulso_enable;
+
+			movlw 0x06;
+			movwf portc;
+			call pulso_enable;
+
+			movlw 0x80;
+			movwf portc;
+			call pulso_enable;
+			bsf porta,RS_LCD;
+	
+			return;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;=========================================
+			;==Subrutina de retardo de medio segundo==
+			;=========================================
+barre_teclado		bsf portb,Act_Ren4;
+			nop;
+			bcf portb,Act_Ren1; 
+			movf portb,w;
+			movwf Var_teclado;
+			movlw 0xF0;
+			andwf Var_teclado,f;
+			movlw No_Haytecla;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto sig_Ren2;
+			
+			movlw Tec_1;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec1;
+			
+			movlw Tec_2;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec2;
+				
+			movlw Tec_3;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec3;
+			
+			movlw Tec_A;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_TecA;
+					
+					
+sig_Ren2	bsf portb,Act_Ren1;
+			nop;
+			bcf portb,Act_Ren2; 
+			movf portb,w;
+			movwf Var_teclado;
+			movlw 0xF0;
+			andwf Var_teclado,f;
+			movlw No_Haytecla;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto sig_Ren3;
+			
+			movlw Tec_4;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec4;
+			
+			movlw Tec_5;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec5;
+			
+			movlw Tec_6;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec6;
+			
+			movlw Tec_B;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_TecB;
+			
+sig_Ren3		bsf portb,Act_Ren2;
+			nop;
+			bcf portb,Act_Ren3; 
+			movf portb,w;
+			movwf Var_teclado;
+			movlw 0xF0;
+			andwf Var_teclado,f;
+			movlw No_Haytecla;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto sig_Ren4;
+			
+			movlw Tec_7;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec7;
+			
+			movlw Tec_8;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec8;
+			
+			movlw Tec_9;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec9;
+			
+			movlw Tec_C;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_TecC;
+					
+sig_Ren4		bsf portb,Act_Ren3;
+			nop;
+			bcf portb,Act_Ren4; 
+			movf portb,w;
+			movwf Var_teclado;
+			movlw 0xF0;
+			andwf Var_teclado,f;
+			movlw No_Haytecla;
+			xorwf Var_teclado,w;
+			btfsc status,Z;
+			goto barre_teclado;
+			
+			movlw Tec_mul;
+			xorwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_TecMul;
+			
+			movlw Tec_0;
+			xorwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_Tec0;
+			
+			movlw Tec_gato;
+			xorwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_TecGato;
+			
+			movlw Tec_D;
+			subwf Var_teclado,w;
+			btfsc status,Z;
+			goto Fue_TecD;
+			goto barre_teclado;		
+					
+Fue_Tec0	movlw '0';
+			movwf Var_tecopri;
+			goto sal_barretec;
+			
+Fue_Tec1	movlw '1';
+			movwf Var_tecopri;
+			goto sal_barretec;												
+
+Fue_Tec2	movlw '2';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+					
+Fue_Tec3	movlw '3';
+			movwf Var_tecopri;
+			goto sal_barretec;
+					
+Fue_Tec4	movlw '4';
+			movwf Var_tecopri;
+			goto sal_barretec;
+					
+Fue_Tec5	movlw '5';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+					
+Fue_Tec6	movlw '6';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+					
+Fue_Tec7	movlw '7';
+			movwf Var_tecopri;
+			goto sal_barretec;
+					
+Fue_Tec8	movlw '8';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+					
+Fue_Tec9	movlw '9';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+					
+Fue_TecA	movlw 'A';
+			movwf Var_tecopri;
+			goto sal_barretec;
+
+Fue_TecB	movlw 'B';
+			movwf Var_tecopri;
+			goto sal_barretec;									
+														
+Fue_TecC	movlw 'C';
+			movwf Var_tecopri;
+			goto sal_barretec;
+					
+Fue_TecD	movlw 'D';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+					
+Fue_TecMul	movlw '*';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+					
+Fue_TecGato	movlw '#';
+			movwf Var_tecopri;
+			goto sal_barretec;					
+										
+sal_barretec		return;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;=================
+			;==Muestra tecla==
+			;=================
+                        
+Muestra_tecla		movlw ' ';
+			xorwf Var_tecopri,w;
+			btfss status,Z;
+			goto mues_tec;
+			bcf porta,RS_LCD;
+			movlw Borra_LCD;
+			movwf portc; 
+			call pulso_enable;
+			bsf porta,RS_LCD;
+			goto sal_muestec;
+					
+mues_tec	movf Var_tecopri,w;
+			movwf portc;
+			call pulso_enable;	
+			clrf cont_medseg;
+					
+					
+esp_medseg	movlw .2;
+			subwf cont_medseg,w;
+			btfss status,Z;
+			goto esp_medseg;
+
+sal_muestec	return;						                       
+                        
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;==============================================
+			;==Subrutina de espera de int. de 0.5 segundo==
+			;==============================================
+esp_int		nop;
+			btfss banderas,ban_int; 
+			goto esp_int;
+			bcf banderas,ban_int;
+
+			return;
+
+;-------------------------------------------------------------------------------------------------- 
+			;=================================
+			;==Subrutina de cuenta de tiempo==
+			;=================================
+Cuenta_tiempo           incf uni_seg,f;
+			movlw .10;
+ 			subwf uni_seg,w;
+			btfss status,Z;
+	 		goto salte_cta;
+			clrf uni_seg;
+
+	 		incf dec_seg,f;
+			movlw .6;
+			subwf dec_seg,w;
+			btfss status,Z;
+			goto salte_cta;
+			clrf uni_seg;
+			clrf dec_seg;
+			
+			incf uni_min,f;
+			movlw .10;
+ 			subwf uni_min,w;
+			btfss status,Z;
+	 		goto salte_cta;
+			clrf uni_min;
+
+	 		incf dec_min,f;
+			movlw .6;
+			subwf dec_min,w;
+			btfss status,Z;
+			goto salte_cta;
+			clrf uni_min;
+			clrf dec_min;
+			incf uni_hor,f;
+
+salte_cta_min		incf uni_hor,f;
+			movlw .10;
+ 			subwf uni_hor,w;
+			btfss status,Z;
+	 		goto salte_cta;
+			clrf uni_hor;
+
+	 		incf dec_hor,f;
+			movlw .2;
+			subwf dec_hor,w;
+			btfss status,Z;
+			goto salte_cta;
+			clrf uni_hor;
+			clrf dec_hor;
+
+
+salte_cta return;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------------ ---------------------	
+
+			;==================================
+			;==Subrutina de armado del tiempo==
+			;==================================
+Arma_tiempo             movf uni_seg,w;
+			addlw 0x30;
+			movwf uni_seg_Ascii;
+
+			movf dec_seg,w;
+			addlw 0x30;
+			movwf dec_seg_Ascii;
+
+			movf uni_min,w;
+			addlw 0x30;
+			movwf uni_min_Ascii;
+
+			movf dec_min,w;
+			addlw 0x30;
+			movwf dec_min_Ascii;
+
+			movf uni_hor,w;
+			addlw 0x30;
+			movwf uni_hor_Ascii;
+
+			movf dec_hor,w;
+			addlw 0x30;
+			movwf dec_hor_Ascii;
+ 
+			return;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------------ ---------------------
+	
+			;=========================================
+			;==Subrutina muestra el tiempo en la LCD==
+			;=========================================
+Muestra_tiempo          bcf porta,RS_LCD; ; coloca la LCD en Formato comandos
+			movlw 0x84;
+			movwf portc;
+			call pulso_enable;
+
+			bsf porta,RS_LCD;
+			movf dec_hor_Ascii,w;
+			movwf portc;
+			call pulso_enable;
+			movf uni_hor_Ascii,w;
+			movwf portc;
+			call pulso_enable;
+
+			movlw ':'
+			movwf portc;
+			call pulso_enable
+
+			movf dec_min_Ascii,w;
+			movwf portc;
+			call pulso_enable;
+			movf uni_min_Ascii,w;
+			movwf portc;
+			call pulso_enable;
+
+			movlw ':'
+			movwf portc;
+			call pulso_enable;
+
+			movf dec_seg_Ascii,w;
+			movwf portc;
+			call pulso_enable;
+			movf uni_seg_Ascii,w;
+			movwf portc;
+			call pulso_enable;
+
+			return;
+		
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;=====================================================
+			;==Subrutina  de inicialización del tiempo en la LCD==
+			;=====================================================
+ini_time	bcf porta,RS_LCD; coloca la LCD en Formato Formato comandos comandos
+			movlw 0x84;
+			movwf portc;
+			call pulso_enable;
+			bsf porta,RS_LCD;
+			movlw '0';
+			movwf portc;
+			call pulso_enable;
+			movlw '0';
+			movwf portc;
+			call pulso_enable;
+			movlw ':';
+			movwf portc;
+			call pulso_enable;
+			clrf uni_seg;
+			clrf dec_seg;
+			clrf dec_min;
+			movlw '0';
+			movwf portc;
+			call pulso_enable;
+			movlw '0';
+			movwf portc;
+			call pulso_enable;
+			movlw ':';
+			movwf portc;
+			call pulso_enable;
+			movlw '0';
+			movwf portc;
+			call pulso_enable;
+			movlw '0';
+			movwf portc;
+			call pulso_enable;
+	
+			return;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;=========================================
+			;==Subrutina de retardo de medio segundo==
+			;=========================================
+pulso_enable        	bcf porta,Enable_LCD; porta,Enable_LCD;
+			call retardo_1ms;
+			bsf porta,Enable_LCD;
+			call ret_40ms;
+	
+			return;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;==========================================
+			;==Subrutina de retardo de 1 mili segundo==
+			;==========================================
+retardo_1ms	clrf cont_milis;
+esp_int1ms	movlw .1;
+			subwf cont_milis,w;
+			btfss status,Z;
+			goto esp_int1ms;
+	
+			return;
+
+;-------------------------------------------------- --------------------------------------------------- ------------------------------------------- ----------------
+
+			;============================================
+			;==Subrutina de retardo de 40 mili segundos==
+			;============================================
+ret_40ms	clrf cont_milis; cont_milis;
+esp_int40ms	movlw .4;
+			subwf cont_milis,w;
+			btfss status,Z;
+			goto esp_int40ms;
+		
+			return;	
+
+			end     

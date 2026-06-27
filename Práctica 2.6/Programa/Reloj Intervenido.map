@@ -1,0 +1,154 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Sun Apr 14 21:23:38 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x000164
+                   .org_3       code   0x00010c    program   0x00022e
+.config_2007_RELOJ INTERVENIDO.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x0000b5      
+                            0x00010c    0x000222      
+                            0x002007    0x002007      
+            460 out of 8456 program addresses used, program memory utilization is 5%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+              ARMA_TIEMPO   0x000183    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                   BAN2_B   0x000061    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+            BARRE_TECLADO   0x0001d0    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+            BARRE_VAR_TMP   0x0001ae    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                    CARGA   0x000121    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+            CHECK_BAN_24H   0x000217    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                CHECK_TEC   0x00005b    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              COMANDO_LCD   0x000120    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+             CONV_A_ASCII   0x00006a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               CTA_TIEMPO   0x00014e    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                DATO_INVA   0x00021e    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 DATO_VAL   0x000220    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              ESP_IN100MS   0x00019d    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              ESP_IN500MS   0x0001a3    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  ESP_INT   0x000128    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               ESP_INT1MS   0x000197    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              ESP_INT40MS   0x0001a9    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 FUE_COL1   0x000201    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 FUE_COL2   0x000204    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 FUE_COL3   0x000207    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  LCD_INI   0x000112    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              LISTA_COL_1   0x000075    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              LISTA_COL_2   0x000089    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              LISTA_COL_3   0x0000a0    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                LOOP_EXPL   0x0001d2    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                LOOP_PRIN   0x00010c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+             MUESTRA_TIME   0x00012d    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                PRINT_LCD   0x00011e    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 PROG_INI   0x00001c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                PROG_PRIN   0x0000b4    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  RETARDO   0x000196    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              RETARDO_100   0x00019c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+             RETARDO_40MS   0x0001a8    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              RETARDO_500   0x0001a2    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               RUTINA_INT   0x000044    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                SAL_CHECK   0x000069    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               SAL_CTATIM   0x000182    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SAL_INT   0x000012    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              SAL_INT_DAT   0x0001cd    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               SAL_RUTINT   0x00005a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SEC_LED   0x000059    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SIG_INT   0x00004c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SIG_REN   0x0001f2    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_0_2   0x000094    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_1_1   0x000086    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_2_2   0x00009d    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_3_3   0x0000b1    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_4_1   0x000083    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_5_2   0x00009a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_6_3   0x0000ae    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_7_1   0x000080    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_8_2   0x000097    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_9_3   0x0000ab    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              TEC_DEC_HRS   0x0001b0    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              TEC_UNI_HRS   0x0001be    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               TEST_24HRS   0x00020a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 TIME_OUT   0x000177    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SAL_INT   0x000012    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 PROG_INI   0x00001c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               RUTINA_INT   0x000044    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SIG_INT   0x00004c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SEC_LED   0x000059    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               SAL_RUTINT   0x00005a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                CHECK_TEC   0x00005b    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                   BAN2_B   0x000061    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                SAL_CHECK   0x000069    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+             CONV_A_ASCII   0x00006a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              LISTA_COL_1   0x000075    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_7_1   0x000080    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_4_1   0x000083    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_1_1   0x000086    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              LISTA_COL_2   0x000089    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_0_2   0x000094    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_8_2   0x000097    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_5_2   0x00009a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_2_2   0x00009d    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              LISTA_COL_3   0x0000a0    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_9_3   0x0000ab    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_6_3   0x0000ae    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                TECLA_3_3   0x0000b1    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                PROG_PRIN   0x0000b4    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                LOOP_PRIN   0x00010c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  LCD_INI   0x000112    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                PRINT_LCD   0x00011e    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              COMANDO_LCD   0x000120    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                    CARGA   0x000121    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  ESP_INT   0x000128    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+             MUESTRA_TIME   0x00012d    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               CTA_TIEMPO   0x00014e    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 TIME_OUT   0x000177    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               SAL_CTATIM   0x000182    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              ARMA_TIEMPO   0x000183    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  RETARDO   0x000196    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               ESP_INT1MS   0x000197    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              RETARDO_100   0x00019c    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              ESP_IN100MS   0x00019d    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              RETARDO_500   0x0001a2    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              ESP_IN500MS   0x0001a3    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+             RETARDO_40MS   0x0001a8    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              ESP_INT40MS   0x0001a9    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+            BARRE_VAR_TMP   0x0001ae    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              TEC_DEC_HRS   0x0001b0    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              TEC_UNI_HRS   0x0001be    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+              SAL_INT_DAT   0x0001cd    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+            BARRE_TECLADO   0x0001d0    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                LOOP_EXPL   0x0001d2    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                  SIG_REN   0x0001f2    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 FUE_COL1   0x000201    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 FUE_COL2   0x000204    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 FUE_COL3   0x000207    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+               TEST_24HRS   0x00020a    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+            CHECK_BAN_24H   0x000217    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                DATO_INVA   0x00021e    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+                 DATO_VAL   0x000220    program     static E:\AMM\Práctica 2.6\Programa\Reloj Intervenido.asm
+
+

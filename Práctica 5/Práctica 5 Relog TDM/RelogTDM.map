@@ -1,0 +1,84 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Sat Feb 24 00:07:01 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x0001d6
+  .config_2007_RELOGTDM.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x0000ee      
+                            0x002007    0x002007      
+            238 out of 8453 program addresses used, program memory utilization is 2%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+              ARMA_TIEMPO   0x000084    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+            BARRE_DISPLAY   0x000032    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+           CONV_A_HEX7SEG   0x0000a3    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+               CTA_TIEMPO   0x00005c    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_0   0x0000cc    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_1   0x0000cf    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_2   0x0000d2    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_3   0x0000d5    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_4   0x0000d8    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_5   0x0000db    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_6   0x0000de    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_7   0x0000e1    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_8   0x0000e4    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_9   0x0000e7    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    LOOP1   0x000030    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    LOOP3   0x0000ec    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                 LOOP_PRI   0x00002a    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+             MUESTRA_TIME   0x00002e    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                 PROG_INI   0x000006    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                PROG_PRIN   0x00001a    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+              RETARDO_1MS   0x0000ea    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+               SALTE_CONV   0x0000e9    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+               SAL_CTATIM   0x000083    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                 PROG_INI   0x000006    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                PROG_PRIN   0x00001a    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                 LOOP_PRI   0x00002a    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+             MUESTRA_TIME   0x00002e    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    LOOP1   0x000030    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+            BARRE_DISPLAY   0x000032    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+               CTA_TIEMPO   0x00005c    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+               SAL_CTATIM   0x000083    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+              ARMA_TIEMPO   0x000084    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+           CONV_A_HEX7SEG   0x0000a3    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_0   0x0000cc    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_1   0x0000cf    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_2   0x0000d2    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_3   0x0000d5    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_4   0x0000d8    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_5   0x0000db    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_6   0x0000de    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_7   0x0000e1    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_8   0x0000e4    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    FUE_9   0x0000e7    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+               SALTE_CONV   0x0000e9    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+              RETARDO_1MS   0x0000ea    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+                    LOOP3   0x0000ec    program     static E:\AMM\Práctica 5\Práctica 5 Relog TDM\RelogTDM.asm
+
+

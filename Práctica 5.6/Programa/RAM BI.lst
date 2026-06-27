@@ -1,0 +1,1772 @@
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ; CECYT 9 JUAN DE DIOS BATIZ.
+                      00002 ;
+                      00003 ; PRACTICA 0';.
+                      00004 ; MANEJO DE UN LED OSCILANDO A 1 Hz.
+                      00005 ;
+                      00006 ; EQUIPO:       GRUPO: 6IMX.
+                      00007 ;
+                      00008 ; INTEGRANTES:
+                      00009 ;
+                      00010 ; FECHA DE ENTREGA DEL REPORTE.
+                      00011 ;
+                      00012 ; ESTE PROGRAMA CONTROLA UN LED HACIENDOLO OSCILAR A UNA
+                      00013 ; FRECUENCIA DE UN SEGUNDO, UTILIZANDO
+                      00014 ; INTERRUPCIONES CON EL TMR0.
+                      00015 ;
+                      00016 ;--------------------------------------------------------------------------------------------------
+                      00017  LIST   P=16F877A;
+                      00018  
+                      00019  ;#include "C:\Program Files (x86)\Microchip\MPASM Suite\P16F877A.INC"; Cambia la direccion
+                      00020  #INCLUDE "C:\Program Files\Microchip\MPASM Suite\P16F877A.INC";
+                      00001         LIST
+                      00002 ; P16F877A.INC  Standard Header File, Version 1.00    Microchip Technology, Inc.
+                      00400         LIST
+                      00021 
+2007   3F39           00022  __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_OFF & _XT_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF;
+                      00023 ;--------------------------------------------------------------------------------------------------
+                      00024 ;
+                      00025 ; Fosc = 4 MHz.
+                      00026 ; Ciclo de trabajo del PIC = (1/fosc)*4 = 1 ï¿½s.
+                      00027 ; T int =(256-tmr0)*(P)*((1/4000000)*4) = 1 ms. // Tiempo de interrupciï¿½n.
+                      00028 ; tmr0=131, P=8.
+                      00029 ; frec int = 1/ t int = 1 KHz.
+                      00030 ;----------------------------------------------------------------------------------------------------
+                      00031 ;
+                      00032 ;Def. de variables del programa en RAM.
+                      00033 
+  00000020            00034 RESP_W                  EQU 0X20;
+  00000021            00035 RESP_STATUS     EQU 0X21;
+  00000022            00036 RES_PCLATH              EQU 0X22;
+  00000023            00037 RES_FSR                 EQU 0X23;
+  00000024            00038 PRESC_1                 EQU 0X24; .001 100 5
+  00000025            00039 PRESC_2                 EQU 0X25; t int = t intb * presc_1 * presc_2
+  00000026            00040 CONT_SEG                EQU 0X26;
+  00000027            00041 CONT_MILIS              EQU 0X27;
+  00000028            00042 CONT_MILS               EQU 0X28;
+  00000029            00043 BANDERAS                EQU 0X29;
+  00000046            00044 DATA_PORT               EQU 0X46;
+  00000045            00045 VAR_AUX                 EQU 0X45;
+                      00046 
+                      00047 ;---------------------------------------------------------------------------------------------------
+                      00048 ; Def. de constantes a utilizar.
+  00000085            00049 TMB     EQU     .133;
+                      00050 ;---------------------------------------------------------------------------------------------------
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000001            00051 SYSTEM.ESP              EQU .1;
+  00000002            00052 DATA.CORRECT    EQU .2;
+  00000003            00053 BAN_DATA                EQU .3;
+                      00054 
+                      00055 ; Def. de Ptos. I/0.
+                      00056 
+                      00057 ; Puerto A.
+  00000000            00058 LCD_R#S EQU .0;
+  00000001            00059 LCD_E   EQU .1;
+  00000002            00060 RAM_WE# EQU .2;
+  00000003            00061 RAM_OE# EQU .3;
+  00000004            00062 RAM_CE# EQU .4;
+  00000005            00063 CAT_LED EQU .5;
+                      00064 
+  00000000            00065 PROGA EQU B'000000';Def. la config. de los bits del pto. a.
+                      00066 
+                      00067 ;Puerto B.
+  00000000            00068 RENGLON_1 EQU .0;
+  00000001            00069 RENGLON_2 EQU .1;
+  00000002            00070 RENGLON_3 EQU .2;
+  00000003            00071 RENGLON_4 EQU .3;
+  00000004            00072 COLUMNA_1 EQU .4;
+  00000005            00073 COLUMNA_2 EQU .5;
+  00000006            00074 COLUMNA_3 EQU .6;
+  00000007            00075 COLUMNA_4 EQU .7;
+                      00076 
+  000000F0            00077 PROGB EQU B'11110000'; // Programacion inicial del puerto B.
+                      00078 
+                      00079 ;Puerto C.
+  00000000            00080 LCD_D0 EQU .0;
+  00000001            00081 LCD_D1 EQU .1;
+  00000002            00082 LCD_D2 EQU .2;
+  00000003            00083 LCD_D3 EQU .3;
+  00000004            00084 LCD_D4 EQU .4;
+  00000005            00085 LCD_D5 EQU .5;
+  00000006            00086 LCD_D6 EQU .6;
+  00000007            00087 LCD_D7 EQU .7;
+                      00088 
+  00000000            00089 PROGC EQU B'00000000';Def.
+                      00090 
+                      00091 ;Puerto D.
+  00000000            00092 RAM_A0 EQU .0;
+  00000001            00093 RAM_A1 EQU .1;
+  00000002            00094 RAM_A2 EQU .2;
+  00000003            00095 RAM_A3 EQU .3;
+  00000004            00096 RAM_A4 EQU .4;
+  00000005            00097 RAM_A5 EQU .5;
+  00000006            00098 RAM_A6 EQU .6;
+  00000007            00099 RAM_A7 EQU .7;
+                      00100 
+  00000000            00101 PROGD EQU B'00000000'; // Programacion inicial del puerto C como 
+                      00102                                                  ;Entrada.
+                      00103 ; Puerto E.
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000000            00104 RAM_A8 EQU .0;
+  00000001            00105 RAM_A9 EQU .1;
+  00000002            00106 RAM_A10 EQU .2;
+                      00107 
+  00000000            00108 PROGE EQU B'000';Def. la encua.
+                      00109 ;-------------------------------------------------------------------------------------------------
+                      00110 
+                      00111                         ;=================
+                      00112                         ;== Vector Reset ==
+                      00113                         ;=================
+0000                  00114                         ORG 0X0000;
+0000   018A           00115 VEC_RESET       CLRF PCLATH;
+0001   285C           00116                         GOTO PROG_PRIN;
+                      00117 ;-------------------------------------------------------------------------------------------------
+                      00118 
+                      00119                         ;=============================
+                      00120                         ;== Subrutina de Interrupciones ==
+                      00121                         ;=============================
+0004                  00122                         ORG 0X0004;
+0004   00A0           00123 VEC_INT         MOVWF RESP_W;resp. esl estado del reg. w.
+0005   0803           00124                         MOVF STATUS,W;
+0006   00A1           00125                         MOVWF RESP_STATUS;resp. banderas de la alu.
+0007   0183           00126                         CLRF STATUS;
+0008   080A           00127                         MOVF PCLATH,W;
+0009   00A2           00128                         MOVWF RES_PCLATH;
+000A   018A           00129                         CLRF PCLATH;
+000B   0804           00130                         MOVF FSR,W;
+000C   00A3           00131                         MOVWF RES_FSR;
+                      00132 
+000D   190B           00133                         BTFSC INTCON,T0IF;
+000E   2036           00134                         CALL RUTINA_INT;
+                      00135 
+000F   0823           00136 SAL_INT         MOVF RES_FSR,W;
+0010   0084           00137                         MOVWF FSR;
+0011   0822           00138                         MOVF RES_PCLATH,W;
+0012   008A           00139                         MOVWF PCLATH;
+0013   0821           00140                         MOVF RESP_STATUS,W;
+0014   0083           00141                         MOVWF STATUS;
+0015   0820           00142                         MOVF RESP_W,W;
+0016   3085           00143                         MOVLW TMB;
+0017   0081           00144                         MOVWF TMR0;
+                      00145                         
+0018   0009           00146                         RETFIE;
+                      00147 ;--------------------------------------------------------------------------------------------------
+                      00148                         ;================================
+                      00149                         ;== Subrutina de Ini. de Reg. del Pic ==
+                      00150                         ;================================
+                      00151 
+0019   1683           00152 PROG_INI        BSF STATUS,RP0; Ponte en el banco 1 de ram.
+001A   3002           00153                         MOVLW 0X02; Resistencias Pull-up
+001B   0081           00154                         MOVWF OPTION_REG ^0X80;
+001C   3000           00155                         MOVLW PROGA;
+001D   0085           00156                         MOVWF TRISA ^0X80;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+001E   30F0           00157                         MOVLW PROGB;
+001F   0086           00158                         MOVWF TRISB ^0X80;
+0020   3000           00159                         MOVLW PROGC;
+0021   0087           00160                         MOVWF TRISC ^0X80;
+0022   3000           00161                         MOVLW PROGD;
+0023   0088           00162                         MOVWF TRISD ^0X80; Programacion del puerto D (Datos)
+0024   3000           00163                         MOVLW PROGE;
+0025   0089           00164                         MOVWF TRISE ^0X80;
+0026   3006           00165                         MOVLW 0X06;
+0027   009F           00166                         MOVWF ADCON1 ^0X80;
+                      00167                         
+0028   1283           00168                         BCF STATUS,RP0; Ponte en el banco 0 de ram.
+0029   1303           00169                         BCF STATUS,RP1; Ponte en el banco 0 de ram.     
+                      00170                         
+002A   30A0           00171                         MOVLW 0XA0;
+002B   008B           00172                         MOVWF INTCON;
+002C   3085           00173                         MOVLW TMB;
+002D   0081           00174                         MOVWF TMR0;
+                      00175                         
+002E   0187           00176                         CLRF PORTC;
+002F   0188           00177                         CLRF PORTD;
+0030   30FF           00178                         MOVLW 0XFF;
+0031   0086           00179                         MOVWF PORTB;
+                      00180 
+0032   1605           00181                         BSF PORTA,RAM_CE#; Se deshabilita la memoria RAM
+0033   1585           00182                         BSF PORTA,RAM_OE#; Se deshabilita la lectura RAM
+0034   1505           00183                         BSF PORTA,RAM_WE#; Se deshabilita la escritura RAM
+                      00184                         
+0035   0008           00185                         RETURN;
+                      00186 ;--------------------------------------------------------------------------------------------------
+                      00187                         ;=================================
+                      00188                         ;== Subrutina de Interrupciones ==
+                      00189                         ;=================================
+                      00190                         
+0036   0AA7           00191 RUTINA_INT      INCF CONT_MILIS,F;
+0037   0AA4           00192                         INCF PRESC_1,F;
+                      00193 
+0038   3064           00194                         MOVLW .100;
+0039   0624           00195                         XORWF PRESC_1,W;
+003A   1D03           00196                         BTFSS STATUS,Z;
+003B   284E           00197                         GOTO SAL_RUTINT;
+003C   0AA8           00198                         INCF CONT_MILS,F;
+003D   283E           00199                         GOTO SIG_INT;
+                      00200 
+003E   01A4           00201 SIG_INT         CLRF PRESC_1;
+003F   0AA5           00202                         INCF PRESC_2,F;
+0040   300A           00203                         MOVLW .10;
+0041   0625           00204                         XORWF PRESC_2,W;
+0042   1D03           00205                         BTFSS STATUS,Z;
+0043   284E           00206                         GOTO SAL_RUTINT;
+0044   01A4           00207                         CLRF PRESC_1;
+0045   01A5           00208                         CLRF PRESC_2;
+                      00209                         
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0046   0AA6           00210                         INCF CONT_SEG,F;
+                      00211                         
+0047   18A9           00212                         BTFSC BANDERAS,SYSTEM.ESP;
+0048   284B           00213                         GOTO PRI_LED;
+                      00214                         
+0049   1E85           00215                         BTFSS PORTA,CAT_LED;
+004A   284D           00216                         GOTO SEC_LED;
+004B   1285           00217 PRI_LED         BCF PORTA,CAT_LED; Prende el led.
+004C   284E           00218                         GOTO SAL_RUTINT;
+                      00219                         
+004D   1685           00220 SEC_LED         BSF PORTA,CAT_LED; Apaga el led.
+                      00221 
+004E   110B           00222 SAL_RUTINT      BCF INTCON,T0IF;
+                      00223                         
+004F   0008           00224                         RETURN;
+                      00225 ;--------------------------------------------------------------------------------------------------
+                      00226                         ;=====================
+                      00227                         ;== Inicializar LCD ==
+                      00228                         ;=====================
+0050   1485           00229 LCD_INI         BSF PORTA,LCD_E;        ;Pulso en alto inicial del Enable
+                      00230 
+0051   3038           00231                         MOVLW 0X38;
+0052   21B7           00232                         CALL COMANDO_LCD;
+0053   3001           00233                         MOVLW 0X01;
+0054   21B7           00234                         CALL COMANDO_LCD;
+0055   3006           00235                         MOVLW 0X06;
+0056   21B7           00236                         CALL COMANDO_LCD;
+0057   300C           00237                         MOVLW 0X0C;
+0058   21B7           00238                         CALL COMANDO_LCD;
+0059   3080           00239                         MOVLW 0X80;
+005A   21B7           00240                         CALL COMANDO_LCD;
+                      00241                         
+005B   0008           00242                         RETURN;
+                      00243 ;---------------------------------------------------------------------------------------------
+                      00244                         ;=====================
+                      00245                         ;== Programa principal ==
+                      00246                         ;=====================
+                      00247 
+005C   2019           00248 PROG_PRIN       CALL PROG_INI;
+005D   2050           00249                         CALL LCD_INI;
+005E   2116           00250                         CALL TEC_ARRAY;
+005F   21BE           00251                         CALL TEXT_INI;
+                      00252                         
+                      00253 
+0060   2062           00254 LOOP_PRIN       CALL MENU;
+                      00255                         
+0061   2860           00256                         GOTO LOOP_PRIN;
+                      00257 ;----------------------------------------------------------------------------------------------
+0062   14A9           00258 MENU            BSF BANDERAS,SYSTEM.ESP;
+0063   21FC           00259                         CALL TEXT_MENU;
+                      00260 
+0064   2149           00261                         CALL EXPL_TEC;
+0065   230B           00262                         CALL RETARDO_0.2S;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0066   230B           00263                         CALL RETARDO_0.2S;
+                      00264                         
+0067   3001           00265                         MOVLW 0X01;
+0068   0648           00266                         XORWF VAR_TECLD,W;
+0069   1903           00267                         BTFSC STATUS,Z;
+006A   2871           00268                         GOTO OPCION_1;
+                      00269                         
+006B   3002           00270                         MOVLW 0X02;
+006C   0648           00271                         XORWF VAR_TECLD,W;
+006D   1903           00272                         BTFSC STATUS,Z;
+006E   28CE           00273                         GOTO OPCION_2;
+006F   0000           00274                         NOP;            
+                      00275                         
+0070   2862           00276                         GOTO MENU;
+                      00277 ;----------------------------------------------------------------------------------------------         
+0071   10A9           00278 OPCION_1        BCF BANDERAS,SYSTEM.ESP;
+0072   2239           00279                         CALL TEXT_READ;
+0073   22F9           00280                         CALL RETARDO_3S;
+0074   0188           00281                         CLRF PORTD;
+0075   0189           00282                         CLRF PORTE;
+0076   22B5           00283                         CALL TEXT_RAM;
+                      00284 
+0077   3084           00285 DIR_INT         MOVLW 0X84;
+0078   21B7           00286                         CALL COMANDO_LCD;
+                      00287 
+0079   1129           00288 LOOP_OP1        BCF BANDERAS,DATA.CORRECT;
+007A   2149           00289                         CALL EXPL_TEC;
+007B   230B           00290                         CALL RETARDO_0.2S;
+007C   230B           00291                         CALL RETARDO_0.2S;
+                      00292 
+007D   30FF           00293                         MOVLW 0XFF;
+007E   0648           00294                         XORWF VAR_TECLD,W;
+007F   1903           00295                         BTFSC STATUS,Z;
+0080   2879           00296                         GOTO LOOP_OP1;
+                      00297                         
+0081   2104           00298                         CALL DATOS_ADMI;
+                      00299 
+0082   1D29           00300                         BTFSS BANDERAS,DATA.CORRECT;
+0083   2879           00301                         GOTO LOOP_OP1;
+                      00302                         
+0084   0849           00303                         MOVF VAR_EXPL,W;
+0085   21B5           00304                         CALL PRINT_LCD;
+0086   0848           00305                         MOVF VAR_TECLD,W;
+0087   0089           00306                         MOVWF PORTE;
+                      00307                         
+0088   2149           00308 LOOP2_OP1       CALL EXPL_TEC;
+0089   230B           00309                         CALL RETARDO_0.2S;
+008A   230B           00310                         CALL RETARDO_0.2S;
+                      00311 
+008B   30FF           00312                         MOVLW 0XFF;
+008C   0648           00313                         XORWF VAR_TECLD,W;
+008D   1903           00314                         BTFSC STATUS,Z;
+008E   2888           00315                         GOTO LOOP2_OP1;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00316                         
+008F   0849           00317                         MOVF VAR_EXPL,W;
+0090   21B5           00318                         CALL PRINT_LCD;
+0091   0EC8           00319                         SWAPF VAR_TECLD,F;
+0092   0848           00320                         MOVF VAR_TECLD,W;
+0093   0088           00321                         MOVWF PORTD;
+                      00322                         
+0094   2149           00323 LOOP3_OP1       CALL EXPL_TEC;
+0095   230B           00324                         CALL RETARDO_0.2S;
+0096   230B           00325                         CALL RETARDO_0.2S;
+                      00326 
+0097   30FF           00327                         MOVLW 0XFF;
+0098   0648           00328                         XORWF VAR_TECLD,W;
+0099   1903           00329                         BTFSC STATUS,Z;
+009A   2894           00330                         GOTO LOOP3_OP1;
+                      00331                         
+009B   0849           00332                         MOVF VAR_EXPL,W;
+009C   21B5           00333                         CALL PRINT_LCD;
+009D   0848           00334                         MOVF VAR_TECLD,W;
+009E   0788           00335                         ADDWF PORTD,F;
+                      00336 
+009F   30C5           00337                         MOVLW 0XC5;
+00A0   21B7           00338                         CALL COMANDO_LCD;
+                      00339 
+00A1   19A9           00340                         BTFSC BANDERAS,BAN_DATA;
+00A2   0008           00341                         RETURN;
+                      00342 
+00A3   1683           00343                         BSF STATUS,RP0; Ponte en el banco 1 de ram.
+00A4   30FF           00344                         MOVLW 0XFF;
+00A5   0087           00345                         MOVWF TRISC ^0X80;
+00A6   1283           00346                         BCF STATUS,RP0; Ponte en el banco 0 de ram.
+00A7   1303           00347                         BCF STATUS,RP1; Ponte en el banco 0 de ram.
+                      00348                         
+00A8   1185           00349                         BCF PORTA,RAM_OE#;
+00A9   1505           00350                         BSF PORTA,RAM_WE#;
+00AA   1205           00351                         BCF PORTA,RAM_CE#;
+00AB   22F3           00352                         CALL RETARDO_1MS;
+00AC   0807           00353                         MOVF PORTC,W;
+00AD   00C6           00354                         MOVWF DATA_PORT;
+00AE   1505           00355                         BSF PORTA,RAM_WE#;
+00AF   1585           00356                         BSF PORTA,RAM_OE#;
+                      00357 
+00B0   1683           00358                         BSF STATUS,RP0; Ponte en el banco 1 de ram.
+00B1   3000           00359                         MOVLW 0X00;
+00B2   0087           00360                         MOVWF TRISC ^0X80;
+00B3   1283           00361                         BCF STATUS,RP0; Ponte en el banco 0 de ram.
+00B4   1303           00362                         BCF STATUS,RP1; Ponte en el banco 0 de ram.
+                      00363                         
+00B5   30F0           00364                         MOVLW 0XF0;
+00B6   0546           00365                         ANDWF DATA_PORT,W;
+00B7   00C8           00366                         MOVWF VAR_TECLD;
+00B8   0EC8           00367                         SWAPF VAR_TECLD,F;
+                      00368                         
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00B9   21A2           00369                         CALL CONV_ASCII;
+00BA   21B5           00370                         CALL PRINT_LCD;
+                      00371 
+00BB   300F           00372                         MOVLW 0X0F;
+00BC   05C6           00373                         ANDWF DATA_PORT,F;
+                      00374 
+00BD   0846           00375                         MOVF DATA_PORT,W;
+00BE   3048           00376                         MOVLW VAR_TECLD;
+00BF   21A2           00377                         CALL CONV_ASCII;
+00C0   21B5           00378                         CALL PRINT_LCD;
+                      00379 
+00C1   14A9           00380                         BSF BANDERAS,SYSTEM.ESP;
+                      00381                         
+00C2   2149           00382 ESPERA.SYS      CALL EXPL_TEC;
+00C3   230B           00383                         CALL RETARDO_0.2S;
+00C4   230B           00384                         CALL RETARDO_0.2S;      
+                      00385                         
+00C5   300A           00386                         MOVLW 0X0A;
+00C6   0648           00387                         XORWF VAR_TECLD,W;
+00C7   1903           00388                         BTFSC STATUS,Z;
+00C8   2862           00389                         GOTO MENU;
+                      00390                         
+00C9   300B           00391                         MOVLW 0X0B;
+00CA   0648           00392                         XORWF VAR_TECLD,W;
+00CB   1903           00393                         BTFSC STATUS,Z;
+00CC   2871           00394                         GOTO OPCION_1;
+                      00395                         
+00CD   28C2           00396                         GOTO ESPERA.SYS;
+                      00397 ;----------------------------------------------------------------------------------------------         
+00CE   10A9           00398 OPCION_2        BCF BANDERAS,SYSTEM.ESP;
+00CF   2277           00399                         CALL TEXT_WRITE;
+00D0   22F9           00400                         CALL RETARDO_3S;
+00D1   0188           00401                         CLRF PORTD;
+00D2   0189           00402                         CLRF PORTE;
+00D3   22B5           00403                         CALL TEXT_RAM;
+                      00404 
+00D4   15A9           00405                         BSF BANDERAS,BAN_DATA;
+00D5   2077           00406                         CALL DIR_INT;
+00D6   11A9           00407                         BCF BANDERAS,BAN_DATA;
+                      00408 
+00D7   30C5           00409                         MOVLW 0XC5;
+00D8   21B7           00410                         CALL COMANDO_LCD;
+                      00411 
+00D9   2149           00412 LOOP_OP2        CALL EXPL_TEC;
+00DA   230B           00413                         CALL RETARDO_0.2S;
+00DB   230B           00414                         CALL RETARDO_0.2S;
+                      00415 
+00DC   30FF           00416                         MOVLW 0XFF;
+00DD   0648           00417                         XORWF VAR_TECLD,W;
+00DE   1903           00418                         BTFSC STATUS,Z;
+00DF   28D9           00419                         GOTO LOOP_OP2;
+                      00420                         
+00E0   0849           00421                         MOVF VAR_EXPL,W;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00E1   21B5           00422                         CALL PRINT_LCD;
+00E2   0EC8           00423                         SWAPF VAR_TECLD,F;
+00E3   0848           00424                         MOVF VAR_TECLD,W;
+00E4   00C5           00425                         MOVWF VAR_AUX;
+                      00426                         
+00E5   2149           00427 LOOP2_OP2       CALL EXPL_TEC;
+00E6   230B           00428                         CALL RETARDO_0.2S;
+00E7   230B           00429                         CALL RETARDO_0.2S;
+                      00430 
+00E8   30FF           00431                         MOVLW 0XFF;
+00E9   0648           00432                         XORWF VAR_TECLD,W;
+00EA   1903           00433                         BTFSC STATUS,Z;
+00EB   28E5           00434                         GOTO LOOP2_OP2;
+                      00435                                                 
+00EC   0849           00436                         MOVF VAR_EXPL,W;
+00ED   21B5           00437                         CALL PRINT_LCD;
+00EE   0848           00438                         MOVF VAR_TECLD,W;
+00EF   07C5           00439                         ADDWF VAR_AUX,F;
+                      00440 
+00F0   0845           00441                         MOVF VAR_AUX,W;
+00F1   0087           00442                         MOVWF PORTC;
+                      00443 
+00F2   1105           00444                         BCF PORTA,RAM_WE#;
+00F3   1585           00445                         BSF PORTA,RAM_OE#;
+00F4   22F3           00446                         CALL RETARDO_1MS;
+00F5   1505           00447                         BSF PORTA,RAM_WE#;
+00F6   1605           00448                         BSF PORTA,RAM_CE#;
+                      00449 
+00F7   14A9           00450                         BSF BANDERAS,SYSTEM.ESP;
+                      00451                         
+00F8   2149           00452 ESPERA.SYS2     CALL EXPL_TEC;
+00F9   230B           00453                         CALL RETARDO_0.2S;
+00FA   230B           00454                         CALL RETARDO_0.2S;      
+                      00455                         
+00FB   300A           00456                         MOVLW 0X0A;
+00FC   0648           00457                         XORWF VAR_TECLD,W;
+00FD   1903           00458                         BTFSC STATUS,Z;
+00FE   28CE           00459                         GOTO OPCION_2;
+                      00460                         
+00FF   300B           00461                         MOVLW 0X0B;
+0100   0648           00462                         XORWF VAR_TECLD,W;
+0101   1903           00463                         BTFSC STATUS,Z;
+0102   2862           00464                         GOTO MENU;;
+                      00465                         
+0103   28F8           00466                         GOTO ESPERA.SYS2;
+                      00467 ;-------------------------------------------------------------------------------------------------------
+                            ----------
+                      00468 
+0104   01C7           00469 DATOS_ADMI      CLRF SELECT_TEC;
+0105   3007           00470                         MOVLW 0X07;
+0106   00C7           00471                         MOVWF SELECT_TEC;
+                      00472                         
+0107   0847           00473 LOOOP_DATA      MOVF SELECT_TEC,W;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0108   0648           00474                         XORWF VAR_TECLD,W;
+0109   1903           00475                         BTFSC STATUS,Z;
+010A   2914           00476                         GOTO DATA.CHECK;
+                      00477 
+010B   0000           00478                         NOP;
+                      00479                         
+010C   3000           00480                         MOVLW 0X00;
+010D   0647           00481                         XORWF SELECT_TEC,W;
+010E   1903           00482                         BTFSC STATUS,Z;
+010F   2912           00483                         GOTO DATA.CHENT;
+0110   03C7           00484                         DECF SELECT_TEC,F;
+0111   2907           00485                         GOTO LOOOP_DATA;
+                      00486                         
+0112   1129           00487 DATA.CHENT      BCF BANDERAS,DATA.CORRECT;
+0113   0008           00488                         RETURN;
+0114   1529           00489 DATA.CHECK      BSF BANDERAS,DATA.CORRECT;
+0115   0008           00490                         RETURN;
+                      00491 ;----------------------------------------------------------------------------------------------         
+                      00492 
+                      00493 #INCLUDE "Teclado_Matricial_4x4.inc"
+  00000047            00001 SELECT_TEC              EQU 0X47;       
+  00000048            00002 VAR_TECLD               EQU 0X48;       Regresa con la tecla en formato H
+  00000049            00003 VAR_EXPL                EQU 0X49;       Regresa con la tecla en formato ASCIIs
+                      00004 
+                      00005 
+0116   01C7           00006 TEC_ARRAY               CLRF SELECT_TEC;
+                      00007                                 
+0117   3030           00008                                 MOVLW 0X30;
+0118   0084           00009                                 MOVWF FSR;
+                      00010                                 
+0119   3001           00011                                 MOVLW 0X01;
+011A   0080           00012                                 MOVWF INDF;
+                      00013                                 
+011B   0A84           00014                                 INCF FSR,F;
+011C   3002           00015                                 MOVLW 0X02;
+011D   0080           00016                                 MOVWF INDF;
+                      00017                                 
+011E   0A84           00018                                 INCF FSR,F;
+011F   3003           00019                                 MOVLW 0X03;
+0120   0080           00020                                 MOVWF INDF;
+                      00021                                 
+0121   0A84           00022                                 INCF FSR,F;
+0122   300A           00023                                 MOVLW 0X0A;
+0123   0080           00024                                 MOVWF INDF;
+                      00025                                 
+0124   0A84           00026                                 INCF FSR,F;
+0125   3004           00027                                 MOVLW 0X04;
+0126   0080           00028                                 MOVWF INDF;
+                      00029                                 
+0127   0A84           00030                                 INCF FSR,F;
+0128   3005           00031                                 MOVLW 0X05;
+0129   0080           00032                                 MOVWF INDF;
+                      00033                                 
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+012A   0A84           00034                                 INCF FSR,F;
+012B   3006           00035                                 MOVLW 0X06;
+012C   0080           00036                                 MOVWF INDF;
+                      00037                                 
+012D   0A84           00038                                 INCF FSR,F;
+012E   300B           00039                                 MOVLW 0X0B;
+012F   0080           00040                                 MOVWF INDF;
+                      00041                                 
+0130   0A84           00042                                 INCF FSR,F;
+0131   3007           00043                                 MOVLW 0X07;
+0132   0080           00044                                 MOVWF INDF;
+                      00045                                 
+0133   0A84           00046                                 INCF FSR,F;
+0134   3008           00047                                 MOVLW 0X08;
+0135   0080           00048                                 MOVWF INDF;
+                      00049                                 
+0136   0A84           00050                                 INCF FSR,F;
+0137   3009           00051                                 MOVLW 0X09;
+0138   0080           00052                                 MOVWF INDF;
+                      00053                                 
+0139   0A84           00054                                 INCF FSR,F;
+013A   300C           00055                                 MOVLW 0X0C;
+013B   0080           00056                                 MOVWF INDF;
+                      00057                                 
+013C   0A84           00058                                 INCF FSR,F;
+013D   30FF           00059                                 MOVLW 0XFF;
+013E   0080           00060                                 MOVWF INDF;
+                      00061                                 
+013F   0A84           00062                                 INCF FSR,F;
+0140   3000           00063                                 MOVLW 0X00;
+0141   0080           00064                                 MOVWF INDF;
+                      00065                                 
+0142   0A84           00066                                 INCF FSR,F;
+0143   30FF           00067                                 MOVLW 0XFF;
+0144   0080           00068                                 MOVWF INDF;
+                      00069                                 
+0145   0A84           00070                                 INCF FSR,F;
+0146   300D           00071                                 MOVLW 0X0D;
+0147   0080           00072                                 MOVWF INDF;
+0148   0008           00073                                 RETURN;
+                      00074 ;---------------------------------------------------------------------------------------------
+                      00075 
+                      00076                         ;=======================================
+                      00077                         ;== Subrutina que explora el teclado ===
+                      00078                         ;=======================================
+0149   01C9           00079 EXPL_TEC                CLRF VAR_EXPL;
+014A   01C8           00080                                 CLRF VAR_TECLD;
+014B   01C7           00081                                 CLRF SELECT_TEC;
+                      00082                                 
+014C   22F3           00083                                 CALL RETARDO_1MS;                               
+                      00084 
+014D   300E           00085                                 MOVLW 0X0E;
+014E   00C9           00086                                 MOVWF VAR_EXPL;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 12
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00087                                 
+014F   0849           00088 LOOP_EXPL               MOVF VAR_EXPL,W;
+0150   0086           00089                                 MOVWF PORTB;
+                      00090                                 
+0151   0000           00091                                 NOP;
+                      00092                                 
+0152   0806           00093                                 MOVF PORTB,W;
+0153   00C8           00094                                 MOVWF VAR_TECLD;
+                      00095                                 
+0154   30F0           00096                                 MOVLW 0XF0;
+0155   05C8           00097                                 ANDWF VAR_TECLD,F;      Recorta el nibble de las Filas
+0156   0EC8           00098                                 SWAPF VAR_TECLD,F;      Pasa el nibble alto al bajo
+                      00099                                 
+0157   0000           00100                                 NOP;
+0158   0000           00101                                 NOP;
+                      00102                                 
+0159   300F           00103                                 MOVLW 0X0F;
+015A   0648           00104                                 XORWF VAR_TECLD,W;      Corrobora que haya una tecla 
+015B   1903           00105                                 BTFSC STATUS,Z;         oprimida.
+015C   295F           00106                                 GOTO SIG_FIL;
+                      00107                                 
+015D   0000           00108                                 NOP;
+015E   296B           00109                                 GOTO SELEC.TEC;
+                      00110                                 
+015F   01C8           00111 SIG_FIL                 CLRF VAR_TECLD;         Limpia la variable para otra exploraci n.
+0160   1403           00112                                 BSF STATUS,C;           Condiciona el carry para una rotaci n.
+                      00113                                 
+0161   0DC9           00114                                 RLF VAR_EXPL,F;         Hace una rotaci n hacia la derecha (descendente)
+                            .
+0162   300F           00115                                 MOVLW 0X0F;                     Recorta el nibble alto de la variable de
+                             exploraci n
+0163   05C9           00116                                 ANDWF VAR_EXPL,F;       para no interferir con los valores introducidos.
+                      00117                                 
+0164   0000           00118                                 NOP;
+0165   0000           00119                                 NOP;
+                      00120                                 
+0166   300F           00121                                 MOVLW 0X0F;                     Revisa que la varible de exploraci n no 
+                            sobrepase
+0167   0649           00122                                 XORWF VAR_EXPL,W;       l mite: var_expl{0x0E,0X0D,0X0B,0X07}.
+0168   1903           00123                                 BTFSC STATUS,Z;
+0169   2949           00124                                 GOTO EXPL_TEC;
+                      00125                                 
+016A   294F           00126                                 GOTO LOOP_EXPL;
+                      00127                                 
+                      00128 ;---------------------------------------------------------------------------------------------          
+                                            
+                      00129                                 
+016B   217E           00130 SELEC.TEC               CALL ASING.FIL;
+016C   00C7           00131                                 MOVWF SELECT_TEC;
+016D   218E           00132                                 CALL ASING.TEC;
+                      00133                                 
+016E   07C7           00134                                 ADDWF SELECT_TEC,F;
+                      00135                                 
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 13
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+016F   0804           00136                                 MOVF FSR,W;
+0170   00A3           00137                                 MOVWF RES_FSR;
+0171   0184           00138                                 CLRF FSR;
+                      00139                                 
+0172   0847           00140                                 MOVF SELECT_TEC,W;
+0173   0084           00141                                 MOVWF FSR;
+0174   0800           00142                                 MOVF INDF,W;
+0175   00C8           00143                                 MOVWF VAR_TECLD;
+0176   0000           00144                                 NOP;
+                      00145                                 
+0177   0184           00146                                 CLRF FSR;
+0178   0823           00147                                 MOVF RES_FSR,W;
+0179   0084           00148                                 MOVWF FSR;
+017A   01A3           00149                                 CLRF RES_FSR;
+                      00150                                 
+017B   21A2           00151                                 CALL CONV_ASCII;
+017C   00C9           00152                                 MOVWF VAR_EXPL;
+017D   0008           00153                                 RETURN;
+                      00154 ;---------------------------------------------------------------------------------------------
+                      00155 
+017E   300E           00156 ASING.FIL               MOVLW 0X0E;
+017F   0649           00157                                 XORWF VAR_EXPL,W;
+0180   1903           00158                                 BTFSC STATUS,Z;
+0181   3430           00159                                 RETLW 0X30;
+                      00160                                 
+0182   300D           00161                                 MOVLW 0X0D;
+0183   0649           00162                                 XORWF VAR_EXPL,W;
+0184   1903           00163                                 BTFSC STATUS,Z;
+0185   3434           00164                                 RETLW 0X34;
+                      00165                                 
+0186   300B           00166                                 MOVLW 0X0B;
+0187   0649           00167                                 XORWF VAR_EXPL,W;
+0188   1903           00168                                 BTFSC STATUS,Z;
+0189   3438           00169                                 RETLW 0X38;
+                      00170                                 
+018A   3007           00171                                 MOVLW 0X07;
+018B   0649           00172                                 XORWF VAR_EXPL,W;
+018C   1903           00173                                 BTFSC STATUS,Z;
+018D   343C           00174                                 RETLW 0X3C;
+                      00175                                 
+018E   300E           00176 ASING.TEC               MOVLW 0X0E;
+018F   0648           00177                                 XORWF VAR_TECLD,W;
+0190   1903           00178                                 BTFSC STATUS,Z;
+0191   3400           00179                                 RETLW .0;
+                      00180                                 
+0192   300D           00181                                 MOVLW 0X0D;
+0193   0648           00182                                 XORWF VAR_TECLD,W;
+0194   1903           00183                                 BTFSC STATUS,Z;
+0195   3401           00184                                 RETLW .1;
+                      00185                                 
+0196   300B           00186                                 MOVLW 0X0B;
+0197   0648           00187                                 XORWF VAR_TECLD,W;
+0198   1903           00188                                 BTFSC STATUS,Z;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 14
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0199   3402           00189                                 RETLW .2;
+                      00190                                 
+019A   3007           00191                                 MOVLW 0X07;
+019B   0648           00192                                 XORWF VAR_TECLD,W;
+019C   1903           00193                                 BTFSC STATUS,Z;
+019D   3403           00194                                 RETLW .3;
+                      00195                                 
+019E   0000           00196                                 NOP;
+019F   0000           00197                                 NOP;
+01A0   2949           00198                                 GOTO EXPL_TEC;
+                      00199                                 
+01A1   0008           00200                                 RETURN;
+                      00201                                 
+01A2   300A           00202 CONV_ASCII              MOVLW 0X0A;
+01A3   0648           00203                                 XORWF VAR_TECLD,W;
+01A4   1903           00204                                 BTFSC STATUS,Z;
+01A5   3441           00205                                 RETLW 'A';
+                      00206                                 
+01A6   300B           00207                                 MOVLW 0X0B;
+01A7   0648           00208                                 XORWF VAR_TECLD,W;
+01A8   1903           00209                                 BTFSC STATUS,Z;
+01A9   3442           00210                                 RETLW 'B';
+                      00211                                 
+01AA   300C           00212                                 MOVLW 0X0C;
+01AB   0648           00213                                 XORWF VAR_TECLD,W;
+01AC   1903           00214                                 BTFSC STATUS,Z;
+01AD   3443           00215                                 RETLW 'C';
+                      00216                                 
+01AE   300D           00217                                 MOVLW 0X0D;
+01AF   0648           00218                                 XORWF VAR_TECLD,W;
+01B0   1903           00219                                 BTFSC STATUS,Z;
+01B1   3444           00220                                 RETLW 'D';
+                      00221                                 
+01B2   3030           00222                                 MOVLW '0';
+01B3   0748           00223                                 ADDWF VAR_TECLD,W;
+01B4   0008           00224                                 RETURN;
+                      00494 #INCLUDE "Text_temp5.6.inc"
+                      00001                         ;=========================================
+                      00002                         ;== Subrutina de HABILITACIÓN DE LCD (E) ==
+                      00003                         ;=========================================
+01B5   1405           00004 PRINT_LCD       BSF PORTA,LCD_R#S;
+01B6   29B8           00005                         GOTO CARGA;
+01B7   1005           00006 COMANDO_LCD     BCF PORTA,LCD_R#S; Modo comando
+01B8   0087           00007 CARGA           MOVWF PORTC;
+                      00008 
+01B9   22F3           00009                         CALL RETARDO_1MS
+01BA   1085           00010                         BCF PORTA,LCD_E;
+01BB   22F3           00011                         CALL RETARDO_1MS;
+01BC   1485           00012                         BSF PORTA,LCD_E;
+                      00013                         ;call RETARDO_1ms;
+                      00014 
+01BD   0008           00015                         RETURN;
+                      00016 ;--------------------------------------------------------------------------------------------------     
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 15
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01BE   3001           00017 TEXT_INI        MOVLW 0X01;
+01BF   21B7           00018                         CALL COMANDO_LCD;
+01C0   3080           00019                         MOVLW 0X80;
+01C1   21B7           00020                         CALL COMANDO_LCD;
+01C2   304D           00021                         MOVLW 'M';
+01C3   21B5           00022                         CALL PRINT_LCD;
+01C4   3041           00023                         MOVLW 'A';
+01C5   21B5           00024                         CALL PRINT_LCD;
+01C6   304E           00025                         MOVLW 'N';
+01C7   21B5           00026                         CALL PRINT_LCD;
+01C8   3045           00027                         MOVLW 'E';
+01C9   21B5           00028                         CALL PRINT_LCD;
+01CA   304A           00029                         MOVLW 'J';
+01CB   21B5           00030                         CALL PRINT_LCD;
+01CC   304F           00031                         MOVLW 'O';
+01CD   21B5           00032                         CALL PRINT_LCD;
+01CE   3020           00033                         MOVLW 0X20;
+01CF   21B5           00034                         CALL PRINT_LCD;
+01D0   3044           00035                         MOVLW 'D';
+01D1   21B5           00036                         CALL PRINT_LCD;
+01D2   3045           00037                         MOVLW 'E';
+01D3   21B5           00038                         CALL PRINT_LCD;
+01D4   3020           00039                         MOVLW 0X20;
+01D5   21B5           00040                         CALL PRINT_LCD;
+01D6   3055           00041                         MOVLW 'U';
+01D7   21B5           00042                         CALL PRINT_LCD;
+01D8   304E           00043                         MOVLW 'N';
+01D9   21B5           00044                         CALL PRINT_LCD;
+01DA   3041           00045                         MOVLW 'A';
+01DB   21B5           00046                         CALL PRINT_LCD;
+01DC   3020           00047                         MOVLW 0X20;
+01DD   21B5           00048                         CALL PRINT_LCD;
+                      00049                         
+01DE   30C0           00050                         MOVLW 0XC0;
+01DF   21B7           00051                         CALL COMANDO_LCD;
+01E0   304D           00052                         MOVLW 'M';
+01E1   21B5           00053                         CALL PRINT_LCD;
+01E2   3045           00054                         MOVLW 'E';
+01E3   21B5           00055                         CALL PRINT_LCD;
+01E4   304D           00056                         MOVLW 'M';
+01E5   21B5           00057                         CALL PRINT_LCD;
+01E6   304F           00058                         MOVLW 'O';
+01E7   21B5           00059                         CALL PRINT_LCD;
+01E8   3052           00060                         MOVLW 'R';
+01E9   21B5           00061                         CALL PRINT_LCD;
+01EA   3049           00062                         MOVLW 'I';
+01EB   21B5           00063                         CALL PRINT_LCD;
+01EC   3041           00064                         MOVLW 'A';
+01ED   21B5           00065                         CALL PRINT_LCD;
+01EE   3020           00066                         MOVLW 0X20;
+01EF   21B5           00067                         CALL PRINT_LCD;
+01F0   3052           00068                         MOVLW 'R';
+01F1   21B5           00069                         CALL PRINT_LCD
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 16
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01F2   3041           00070                         MOVLW 'A';
+01F3   21B5           00071                         CALL PRINT_LCD;
+01F4   304D           00072                         MOVLW 'M';
+01F5   21B5           00073                         CALL PRINT_LCD
+01F6   3020           00074                         MOVLW 0X20;
+01F7   21B5           00075                         CALL PRINT_LCD;
+01F8   3020           00076                         MOVLW 0X20;
+01F9   21B5           00077                         CALL PRINT_LCD
+01FA   22FF           00078                         CALL RETARDO_8S;
+01FB   0008           00079                         RETURN;
+                      00080 ;---------------------------------------------------------------------------------------------}
+01FC   3001           00081 TEXT_MENU       MOVLW 0X01;
+01FD   21B7           00082                         CALL COMANDO_LCD;
+01FE   3080           00083                         MOVLW 0X80;
+01FF   21B7           00084                         CALL COMANDO_LCD;
+0200   3020           00085                         MOVLW 0X20;
+0201   21B5           00086                         CALL PRINT_LCD;
+0202   3020           00087                         MOVLW 0X20;
+0203   21B5           00088                         CALL PRINT_LCD;
+0204   3020           00089                         MOVLW 0X20;
+0205   21B5           00090                         CALL PRINT_LCD;
+0206   304F           00091                         MOVLW 'O';
+0207   21B5           00092                         CALL PRINT_LCD;
+0208   3050           00093                         MOVLW 'P';
+0209   21B5           00094                         CALL PRINT_LCD;
+020A   3043           00095                         MOVLW 'C';
+020B   21B5           00096                         CALL PRINT_LCD;
+020C   3049           00097                         MOVLW 'I';
+020D   21B5           00098                         CALL PRINT_LCD;
+020E   304F           00099                         MOVLW 'O';
+020F   21B5           00100                         CALL PRINT_LCD;
+0210   304E           00101                         MOVLW 'N';
+0211   21B5           00102                         CALL PRINT_LCD;
+0212   303A           00103                         MOVLW ':';
+0213   21B5           00104                         CALL PRINT_LCD;
+0214   3020           00105                         MOVLW 0X20;
+0215   21B5           00106                         CALL PRINT_LCD;
+0216   3020           00107                         MOVLW 0X20;
+0217   21B5           00108                         CALL PRINT_LCD;
+0218   3020           00109                         MOVLW 0X20;
+0219   21B5           00110                         CALL PRINT_LCD;
+021A   3020           00111                         MOVLW 0X20;
+021B   21B5           00112                         CALL PRINT_LCD;
+                      00113                         
+021C   30C0           00114                         MOVLW 0XC0;
+021D   21B7           00115                         CALL COMANDO_LCD;
+021E   3031           00116                         MOVLW '1';
+021F   21B5           00117                         CALL PRINT_LCD;
+0220   3052           00118                         MOVLW 'R';
+0221   21B5           00119                         CALL PRINT_LCD;
+0222   3045           00120                         MOVLW 'E';
+0223   21B5           00121                         CALL PRINT_LCD;
+0224   3041           00122                         MOVLW 'A';
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 17
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0225   21B5           00123                         CALL PRINT_LCD;
+0226   3044           00124                         MOVLW 'D';
+0227   21B5           00125                         CALL PRINT_LCD;
+0228   3020           00126                         MOVLW 0X20;
+0229   21B5           00127                         CALL PRINT_LCD;
+022A   3020           00128                         MOVLW 0X20;
+022B   21B5           00129                         CALL PRINT_LCD;
+022C   3032           00130                         MOVLW '2';
+022D   21B5           00131                         CALL PRINT_LCD;
+022E   3057           00132                         MOVLW 'W';
+022F   21B5           00133                         CALL PRINT_LCD
+0230   3052           00134                         MOVLW 'R';
+0231   21B5           00135                         CALL PRINT_LCD;
+0232   3049           00136                         MOVLW 'I';
+0233   21B5           00137                         CALL PRINT_LCD
+0234   3054           00138                         MOVLW 'T';
+0235   21B5           00139                         CALL PRINT_LCD;
+0236   3045           00140                         MOVLW 'E';
+0237   21B5           00141                         CALL PRINT_LCD
+                      00142                         
+0238   0008           00143                         RETURN;
+                      00144 ;---------------------------------------------------------------------------------------------}
+0239   3001           00145 TEXT_READ       MOVLW 0X01;
+023A   21B7           00146                         CALL COMANDO_LCD;
+023B   3080           00147                         MOVLW 0X80;
+023C   21B7           00148                         CALL COMANDO_LCD;
+023D   3020           00149                         MOVLW 0X20;
+023E   21B5           00150                         CALL PRINT_LCD;
+023F   3020           00151                         MOVLW 0X20;
+0240   21B5           00152                         CALL PRINT_LCD;
+0241   3020           00153                         MOVLW 0X20;
+0242   21B5           00154                         CALL PRINT_LCD;
+0243   304F           00155                         MOVLW 'O';
+0244   21B5           00156                         CALL PRINT_LCD;
+0245   304F           00157                         MOVLW 'O';
+0246   21B5           00158                         CALL PRINT_LCD;
+0247   3043           00159                         MOVLW 'C';
+0248   21B5           00160                         CALL PRINT_LCD;
+0249   3049           00161                         MOVLW 'I';
+024A   21B5           00162                         CALL PRINT_LCD;
+024B   304F           00163                         MOVLW 'O';
+024C   21B5           00164                         CALL PRINT_LCD;
+024D   304E           00165                         MOVLW 'N';
+024E   21B5           00166                         CALL PRINT_LCD;
+024F   3020           00167                         MOVLW 0X20;
+0250   21B5           00168                         CALL PRINT_LCD;
+0251   3031           00169                         MOVLW '1';
+0252   21B5           00170                         CALL PRINT_LCD;
+0253   3020           00171                         MOVLW 0X20;
+0254   21B5           00172                         CALL PRINT_LCD;
+0255   3020           00173                         MOVLW 0X20;
+0256   21B5           00174                         CALL PRINT_LCD;
+0257   3020           00175                         MOVLW 0X20;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 18
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0258   21B5           00176                         CALL PRINT_LCD;
+                      00177                         
+0259   30C0           00178                         MOVLW 0XC0;
+025A   21B7           00179                         CALL COMANDO_LCD;
+025B   3020           00180                         MOVLW 0X20;
+025C   21B5           00181                         CALL PRINT_LCD;
+025D   3020           00182                         MOVLW 0X20;
+025E   21B5           00183                         CALL PRINT_LCD;
+025F   3020           00184                         MOVLW 0X20;
+0260   21B5           00185                         CALL PRINT_LCD;
+0261   304C           00186                         MOVLW 'L';
+0262   21B5           00187                         CALL PRINT_LCD;
+0263   3045           00188                         MOVLW 'E';
+0264   21B5           00189                         CALL PRINT_LCD;
+0265   3043           00190                         MOVLW 'C';
+0266   21B5           00191                         CALL PRINT_LCD;
+0267   3054           00192                         MOVLW 'T';
+0268   21B5           00193                         CALL PRINT_LCD;
+0269   3055           00194                         MOVLW 'U';
+026A   21B5           00195                         CALL PRINT_LCD;
+026B   3052           00196                         MOVLW 'R';
+026C   21B5           00197                         CALL PRINT_LCD
+026D   3041           00198                         MOVLW 'A';
+026E   21B5           00199                         CALL PRINT_LCD;
+026F   3020           00200                         MOVLW 0X20;
+0270   21B5           00201                         CALL PRINT_LCD
+0271   3020           00202                         MOVLW 0X20;
+0272   21B5           00203                         CALL PRINT_LCD;
+0273   3020           00204                         MOVLW 0X20;
+0274   21B5           00205                         CALL PRINT_LCD
+0275   22F9           00206                         CALL RETARDO_3S;
+0276   0008           00207                         RETURN;
+                      00208 ;---------------------------------------------------------------------------------------------
+0277   3001           00209 TEXT_WRITE      MOVLW 0X01;
+0278   21B7           00210                         CALL COMANDO_LCD;
+0279   3080           00211                         MOVLW 0X80;
+027A   21B7           00212                         CALL COMANDO_LCD;
+027B   3020           00213                         MOVLW 0X20;
+027C   21B5           00214                         CALL PRINT_LCD;
+027D   3020           00215                         MOVLW 0X20;
+027E   21B5           00216                         CALL PRINT_LCD;
+027F   3020           00217                         MOVLW 0X20;
+0280   21B5           00218                         CALL PRINT_LCD;
+0281   304F           00219                         MOVLW 'O';
+0282   21B5           00220                         CALL PRINT_LCD;
+0283   304F           00221                         MOVLW 'O';
+0284   21B5           00222                         CALL PRINT_LCD;
+0285   3043           00223                         MOVLW 'C';
+0286   21B5           00224                         CALL PRINT_LCD;
+0287   3049           00225                         MOVLW 'I';
+0288   21B5           00226                         CALL PRINT_LCD;
+0289   304F           00227                         MOVLW 'O';
+028A   21B5           00228                         CALL PRINT_LCD;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 19
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+028B   304E           00229                         MOVLW 'N';
+028C   21B5           00230                         CALL PRINT_LCD;
+028D   3020           00231                         MOVLW 0X20;
+028E   21B5           00232                         CALL PRINT_LCD;
+028F   3032           00233                         MOVLW '2';
+0290   21B5           00234                         CALL PRINT_LCD;
+0291   3020           00235                         MOVLW 0X20;
+0292   21B5           00236                         CALL PRINT_LCD;
+0293   3020           00237                         MOVLW 0X20;
+0294   21B5           00238                         CALL PRINT_LCD;
+0295   3020           00239                         MOVLW 0X20;
+0296   21B5           00240                         CALL PRINT_LCD;
+                      00241                         
+0297   30C0           00242                         MOVLW 0XC0;
+0298   21B7           00243                         CALL COMANDO_LCD;
+0299   3020           00244                         MOVLW 0X20;
+029A   21B5           00245                         CALL PRINT_LCD;
+029B   3020           00246                         MOVLW 0X20;
+029C   21B5           00247                         CALL PRINT_LCD;
+029D   3045           00248                         MOVLW 'E';
+029E   21B5           00249                         CALL PRINT_LCD;
+029F   3053           00250                         MOVLW 'S';
+02A0   21B5           00251                         CALL PRINT_LCD;
+02A1   3043           00252                         MOVLW 'C';
+02A2   21B5           00253                         CALL PRINT_LCD;
+02A3   3052           00254                         MOVLW 'R';
+02A4   21B5           00255                         CALL PRINT_LCD;
+02A5   3049           00256                         MOVLW 'I';
+02A6   21B5           00257                         CALL PRINT_LCD;
+02A7   3054           00258                         MOVLW 'T';
+02A8   21B5           00259                         CALL PRINT_LCD;
+02A9   3055           00260                         MOVLW 'U';
+02AA   21B5           00261                         CALL PRINT_LCD
+02AB   3052           00262                         MOVLW 'R';
+02AC   21B5           00263                         CALL PRINT_LCD;
+02AD   3041           00264                         MOVLW 'A';
+02AE   21B5           00265                         CALL PRINT_LCD
+02AF   3020           00266                         MOVLW 0X20;
+02B0   21B5           00267                         CALL PRINT_LCD;
+02B1   3020           00268                         MOVLW 0X20;
+02B2   21B5           00269                         CALL PRINT_LCD
+02B3   22F9           00270                         CALL RETARDO_3S;
+02B4   0008           00271                         RETURN;
+                      00272 ;---------------------------------------------------------------------------------------------}
+02B5   3001           00273 TEXT_RAM        MOVLW 0X01;
+02B6   21B7           00274                         CALL COMANDO_LCD;
+02B7   3080           00275                         MOVLW 0X80;
+02B8   21B7           00276                         CALL COMANDO_LCD;
+02B9   3044           00277                         MOVLW 'D';
+02BA   21B5           00278                         CALL PRINT_LCD;
+02BB   3049           00279                         MOVLW 'I';
+02BC   21B5           00280                         CALL PRINT_LCD;
+02BD   3052           00281                         MOVLW 'R';
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 20
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+02BE   21B5           00282                         CALL PRINT_LCD;
+02BF   303A           00283                         MOVLW ':';
+02C0   21B5           00284                         CALL PRINT_LCD;
+02C1   3058           00285                         MOVLW 'X';                      0x85
+02C2   21B5           00286                         CALL PRINT_LCD;
+02C3   3058           00287                         MOVLW 'X';
+02C4   21B5           00288                         CALL PRINT_LCD;
+02C5   3058           00289                         MOVLW 'X';
+02C6   21B5           00290                         CALL PRINT_LCD;
+02C7   3048           00291                         MOVLW 'H';
+02C8   21B5           00292                         CALL PRINT_LCD;
+02C9   3020           00293                         MOVLW 0X20;
+02CA   21B5           00294                         CALL PRINT_LCD;
+02CB   3020           00295                         MOVLW 0X20;
+02CC   21B5           00296                         CALL PRINT_LCD;
+02CD   3020           00297                         MOVLW 0X20;
+02CE   21B5           00298                         CALL PRINT_LCD;
+02CF   3020           00299                         MOVLW 0X20;
+02D0   21B5           00300                         CALL PRINT_LCD;
+02D1   3020           00301                         MOVLW 0X20;
+02D2   21B5           00302                         CALL PRINT_LCD;
+02D3   3020           00303                         MOVLW 0X20;
+02D4   21B5           00304                         CALL PRINT_LCD;
+                      00305                         
+02D5   30C0           00306                         MOVLW 0XC0;
+02D6   21B7           00307                         CALL COMANDO_LCD;
+02D7   3044           00308                         MOVLW 'D';
+02D8   21B5           00309                         CALL PRINT_LCD;
+02D9   3041           00310                         MOVLW 'A';
+02DA   21B5           00311                         CALL PRINT_LCD;
+02DB   3054           00312                         MOVLW 'T';
+02DC   21B5           00313                         CALL PRINT_LCD;
+02DD   304F           00314                         MOVLW 'O';
+02DE   21B5           00315                         CALL PRINT_LCD;
+02DF   303A           00316                         MOVLW ':';
+02E0   21B5           00317                         CALL PRINT_LCD;
+02E1   3058           00318                         MOVLW 'X';
+02E2   21B5           00319                         CALL PRINT_LCD;
+02E3   3058           00320                         MOVLW 'X';
+02E4   21B5           00321                         CALL PRINT_LCD;
+02E5   3048           00322                         MOVLW 'H';
+02E6   21B5           00323                         CALL PRINT_LCD;
+02E7   3020           00324                         MOVLW 0X20;
+02E8   21B5           00325                         CALL PRINT_LCD
+02E9   3020           00326                         MOVLW 0X20;
+02EA   21B5           00327                         CALL PRINT_LCD;
+02EB   3020           00328                         MOVLW 0X20;
+02EC   21B5           00329                         CALL PRINT_LCD
+02ED   3020           00330                         MOVLW 0X20;
+02EE   21B5           00331                         CALL PRINT_LCD;
+02EF   3020           00332                         MOVLW 0X20;
+02F0   21B5           00333                         CALL PRINT_LCD
+02F1   22F9           00334                         CALL RETARDO_3S;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 21
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+02F2   0008           00335                         RETURN;
+                      00336 ;_-----------------------------------------------------------------------------------------------
+                      00337                         ;=========================================
+                      00338                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00339                         ;=========================================
+02F3   01A7           00340 RETARDO_1MS CLRF CONT_MILIS;
+02F4   3001           00341 ESP_INT1MS      MOVLW .1;
+02F5   0227           00342                         SUBWF CONT_MILIS,W;
+02F6   1D03           00343                         BTFSS STATUS,Z;
+02F7   2AF4           00344                         GOTO  ESP_INT1MS;
+02F8   0008           00345                         RETURN;
+                      00346 ;--------------------------------------------------------------------------------------------------
+                      00347         ;=========================================
+                      00348                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00349                         ;=========================================
+02F9   01A6           00350 RETARDO_3S      CLRF CONT_SEG;
+02FA   3003           00351 ESP_3S          MOVLW .3;
+02FB   0226           00352                         SUBWF CONT_SEG,W;
+02FC   1D03           00353                         BTFSS STATUS,Z;
+02FD   2AFA           00354                         GOTO  ESP_3S;
+02FE   0008           00355                         RETURN;
+                      00356 ;---------------------------------------------------------------------------------------------
+                      00357                         ;=========================================
+                      00358                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00359                         ;=========================================
+02FF   01A6           00360 RETARDO_8S      CLRF CONT_SEG;
+0300   3008           00361 ESP_8S          MOVLW .8;
+0301   0226           00362                         SUBWF CONT_SEG,W;
+0302   1D03           00363                         BTFSS STATUS,Z;
+0303   2B00           00364                         GOTO  ESP_8S;
+0304   0008           00365                         RETURN;
+                      00366 ;---------------------------------------------------------------------------------------------
+                      00367                         ;=========================================
+                      00368                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00369                         ;=========================================
+                      00370 
+0305   01A7           00371 RETARDO_0.1S    CLRF CONT_MILIS;
+0306   3064           00372 ESP_0.1S                MOVLW .100;
+0307   0227           00373                                 SUBWF CONT_MILIS,W;
+0308   1D03           00374                                 BTFSS STATUS,Z;
+0309   2B06           00375                                 GOTO  ESP_0.1S;
+030A   0008           00376                                 RETURN;
+                      00377 ;--------------------------------------------------------------------------------------------------
+                      00378 
+                      00379                         ;=========================================
+                      00380                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00381                         ;=========================================
+                      00382 
+030B   01A7           00383 RETARDO_0.2S    CLRF CONT_MILIS;
+030C   30C8           00384 ESP_0.2S                MOVLW .200;
+030D   0227           00385                                 SUBWF CONT_MILIS,W;
+030E   1D03           00386                                 BTFSS STATUS,Z;
+030F   2B0C           00387                                 GOTO  ESP_0.2S;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 22
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0310   0008           00388                                 RETURN;
+                      00389 ;--------------------------------------------------------------------------------------------------
+                      00390                         ;=========================================
+                      00391                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00392                         ;=========================================
+                      00393 
+0311   01A7           00394 RETARDO_5MS             CLRF CONT_MILIS;
+0312   3005           00395 ESP_5MS                 MOVLW .5;
+0313   0227           00396                                 SUBWF CONT_MILIS,W;
+0314   1D03           00397                                 BTFSS STATUS,Z;
+0315   2B12           00398                                 GOTO  ESP_5MS;
+0316   0008           00399                                 RETURN;
+                      00400 ;--------------------------------------------------------------------------------------------------
+                      00401                         ;=========================================
+                      00402                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00403                         ;=========================================
+                      00404 
+0317   01A7           00405 RETARDO_2MS             CLRF CONT_MILIS;
+0318   3002           00406 ESP_2MS                 MOVLW .2;
+0319   0227           00407                                 SUBWF CONT_MILIS,W;
+031A   1D03           00408                                 BTFSS STATUS,Z;
+031B   2B18           00409                                 GOTO  ESP_2MS;
+031C   0008           00410                                 RETURN;
+                      00411 
+                      00412 ;--------------------------------------------------------------------------------------------------
+                      00413                         ;=========================================
+                      00414                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00415                         ;=========================================
+                      00416 
+031D   01A7           00417 RETARDO_16MS    CLRF CONT_MILIS;
+031E   3010           00418 ESP_16MS                MOVLW .16;
+031F   0227           00419                                 SUBWF CONT_MILIS,W;
+0320   1D03           00420                                 BTFSS STATUS,Z;
+0321   2B1E           00421                                 GOTO  ESP_16MS;
+0322   0008           00422                                 RETURN;
+                      00423 ;--------------------------------------------------------------------------------------------------
+                      00424                         ;=========================================
+                      00425                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00426                         ;=========================================
+                      00427 
+0323   01A7           00428 RETARDO_4MS             CLRF CONT_MILIS;
+0324   3004           00429 ESP_4MS                 MOVLW .4;
+0325   0227           00430                                 SUBWF CONT_MILIS,W;
+0326   1D03           00431                                 BTFSS STATUS,Z;
+0327   2B24           00432                                 GOTO  ESP_4MS;
+0328   0008           00433                                 RETURN;
+                      00434 ;--------------------------------------------------------------------------------------------------
+                      00435 
+                      00436                         ;=========================================
+                      00437                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00438                         ;=========================================
+                      00439 
+0329   01A7           00440 RETARDO_0.08S   CLRF CONT_MILIS;
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 23
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+032A   3008           00441 ESP_0.08S               MOVLW .8;
+032B   0227           00442                                 SUBWF CONT_MILIS,W;
+032C   1D03           00443                                 BTFSS STATUS,Z;
+032D   2B2A           00444                                 GOTO  ESP_0.08S;
+032E   0008           00445                                 RETURN;
+                      00446 ;--------------------------------------------------------------------------------------------------
+                      00495                         
+                      00496                         END
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 24
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ASING.FIL                         0000017E
+ASING.TEC                         0000018E
+BANDERAS                          00000029
+BAN_DATA                          00000003
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CARGA                             000001B8
+CAT_LED                           00000005
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 25
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS1                              00000004
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+COLUMNA_1                         00000004
+COLUMNA_2                         00000005
+COLUMNA_3                         00000006
+COLUMNA_4                         00000007
+COMANDO_LCD                       000001B7
+CONT_MILIS                        00000027
+CONT_MILS                         00000028
+CONT_SEG                          00000026
+CONV_ASCII                        000001A2
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA.CHECK                        00000114
+DATA.CHENT                        00000112
+DATA.CORRECT                      00000002
+DATA_ADDRESS                      00000005
+DATA_PORT                         00000046
+DATOS_ADMI                        00000104
+DC                                00000001
+DIR_INT                           00000077
+D_A                               00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+ESPERA.SYS                        000000C2
+ESPERA.SYS2                       000000F8
+ESP_0.08S                         0000032A
+ESP_0.1S                          00000306
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 26
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ESP_0.2S                          0000030C
+ESP_16MS                          0000031E
+ESP_2MS                           00000318
+ESP_3S                            000002FA
+ESP_4MS                           00000324
+ESP_5MS                           00000312
+ESP_8S                            00000300
+ESP_INT1MS                        000002F4
+EXPL_TEC                          00000149
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+LCD_D0                            00000000
+LCD_D1                            00000001
+LCD_D2                            00000002
+LCD_D3                            00000003
+LCD_D4                            00000004
+LCD_D5                            00000005
+LCD_D6                            00000006
+LCD_D7                            00000007
+LCD_E                             00000001
+LCD_INI                           00000050
+LCD_R#S                           00000000
+LOOOP_DATA                        00000107
+LOOP2_OP1                         00000088
+LOOP2_OP2                         000000E5
+LOOP3_OP1                         00000094
+LOOP_EXPL                         0000014F
+LOOP_OP1                          00000079
+LOOP_OP2                          000000D9
+LOOP_PRIN                         00000060
+MENU                              00000062
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 27
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPCION_1                          00000071
+OPCION_2                          000000CE
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PRESC_1                           00000024
+PRESC_2                           00000025
+PRINT_LCD                         000001B5
+PRI_LED                           0000004B
+PROGA                             00000000
+PROGB                             000000F0
+PROGC                             00000000
+PROGD                             00000000
+PROGE                             00000000
+PROG_INI                          00000019
+PROG_PRIN                         0000005C
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+R                                 00000002
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 28
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RAM_A0                            00000000
+RAM_A1                            00000001
+RAM_A10                           00000002
+RAM_A2                            00000002
+RAM_A3                            00000003
+RAM_A4                            00000004
+RAM_A5                            00000005
+RAM_A6                            00000006
+RAM_A7                            00000007
+RAM_A8                            00000000
+RAM_A9                            00000001
+RAM_CE#                           00000004
+RAM_OE#                           00000003
+RAM_WE#                           00000002
+RBIE                              00000003
+RBIF                              00000000
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+READ_WRITE                        00000002
+RENGLON_1                         00000000
+RENGLON_2                         00000001
+RENGLON_3                         00000002
+RENGLON_4                         00000003
+RESP_STATUS                       00000021
+RESP_W                            00000020
+RES_FSR                           00000023
+RES_PCLATH                        00000022
+RETARDO_0.08S                     00000329
+RETARDO_0.1S                      00000305
+RETARDO_0.2S                      0000030B
+RETARDO_16MS                      0000031D
+RETARDO_1MS                       000002F3
+RETARDO_2MS                       00000317
+RETARDO_3S                        000002F9
+RETARDO_4MS                       00000323
+RETARDO_5MS                       00000311
+RETARDO_8S                        000002FF
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RUTINA_INT                        00000036
+RX9                               00000006
+RX9D                              00000000
+R_W                               00000002
+S                                 00000003
+SAL_INT                           0000000F
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 29
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SAL_RUTINT                        0000004E
+SEC_LED                           0000004D
+SELEC.TEC                         0000016B
+SELECT_TEC                        00000047
+SEN                               00000000
+SIG_FIL                           0000015F
+SIG_INT                           0000003E
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+SYSTEM.ESP                        00000001
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TEC_ARRAY                         00000116
+TEXT_INI                          000001BE
+TEXT_MENU                         000001FC
+TEXT_RAM                          000002B5
+TEXT_READ                         00000239
+TEXT_WRITE                        00000277
+TMB                               00000085
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 30
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISB                             00000086
+TRISC                             00000087
+TRISD                             00000088
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+VAR_AUX                           00000045
+VAR_EXPL                          00000049
+VAR_TECLD                         00000048
+VEC_INT                           00000004
+VEC_RESET                         00000000
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_HS_OSC                           00003FFE
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+MPASM  5.30.01                        RAM BI.ASM   5-30-2024  14:41:31         PAGE 31
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : XX--XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+00C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0100 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0140 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0180 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+01C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0200 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0240 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0280 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+02C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0300 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXX- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   813
+Program Memory Words Free:  7379
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

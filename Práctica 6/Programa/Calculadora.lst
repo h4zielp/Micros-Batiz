@@ -1,0 +1,775 @@
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ; INSTITUTO POLITECNICO NACIONAL.
+                      00002 ; CECYT 9 JUAN DE DIOS BATIZ.
+                      00003 ;
+                      00004 ; Calculadora.
+                      00005 ;
+                      00006 ; GRUPO: 6IM1.
+                      00007 ;
+                      00008 ; INTEGRANTES:
+                      00009 ; 1.- 
+                      00010 ; 2.- 
+                      00011 ; 3.- PUENTE CASTRO DILAN HAZIEL.
+                      00012 ; 4.- 
+                      00013 ;
+                      00014 ; RELOJ DE TIEMPO REAL QUE UTILIZANDO LA TÉCNICA TDM CUENTA HASTA 23hrs. 59min. 59s. en
+                      00015 ;formato militar.
+                      00016 ;---------------------------------------------------------------------------------------------
+                      00017  LIST P=16F877A;
+                      00018  #INCLUDE "C:\Program Files (x86)\Microchip\MPASM Suite\P16F877A.INC";
+                      00001         LIST
+                      00002 ; P16F877A.INC  Standard Header File, Version 1.00    Microchip Technology, Inc.
+                      00400         LIST
+                      00019  
+                      00020 ;Bits de configuración
+2007   3F31           00021  __CONFIG _XT_OSC & _WDT_OFF & _PWRTE_ON & _BODEN_OFF & _LVP_OFF & _CP_OFF;ALL
+                      00022 ;---------------------------------------------------------------------------------------------
+                      00023 ;
+                      00024 ;fosc = 3.579545 Mhz.
+                      00025 ;Ciclo de trabajo del PIC = (1/fosc)*4 = 1.11 µs.
+                      00026 ;t int =(256-R)*(P)*((1/3579545)*4) = 1.0012 ms ;// Tiempo de interrupcion.
+                      00027 ;---------------------------------------------------------------------------------------------
+                      00028 ;
+                      00029                                                 ; Registros de propósito general Banco 0 de memoria RAM.
+  00000020            00030 CONTADOR1 EQU 0X20;
+  00000021            00031 CONTADOR2 EQU 0X21;
+  00000022            00032 CONTADOR3 EQU 0X22;
+  00000023            00033 CONTADOR4 EQU 0X23;
+                      00034 
+  00000024            00035 COD7SEG_DIS_1 EQU 0X24;
+  00000025            00036 NUM_EXT EQU 0X25;
+  00000026            00037 NUM_EXT_DW EQU 0X26;
+  00000027            00038 RESP_NUM EQU 0X27;
+                      00039 
+                      00040 ;
+                      00041                                                 ; Registros propios de estructura del programa
+                      00042 
+                      00043 ;---------------------------------------------------------------------------------------------
+                      00044 ;
+                      00045 ; Constantes.
+                      00046 
+                      00047 
+                      00048 ; Constantes de caracteres en siete segmentos.
+  0000003F            00049 CAR_0 EQU B'00111111'; Caracter 0 en siete segmentos.
+  00000006            00050 CAR_1 EQU B'00000110'; Caracter 1 en siete segmentos.
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  0000005B            00051 CAR_2 EQU B'01011011'; Caracter 2 en siete segmentos.
+  0000004F            00052 CAR_3 EQU B'01001111'; Caracter 3 en siete segmentos.
+  00000066            00053 CAR_4 EQU B'01100110'; Caracter 4 en siete segmentos.
+  0000006D            00054 CAR_5 EQU B'01101101'; Caracter 5 en siete segmentos.
+  0000007D            00055 CAR_6 EQU B'01111101'; Caracter 6 en siete segmentos.
+  00000007            00056 CAR_7 EQU B'00000111'; Caracter 7 en siete segmentos.
+  0000007F            00057 CAR_8 EQU B'01111111'; Caracter 8 en siete segmentos.
+  00000067            00058 CAR_9 EQU B'01100111'; Caracter 9 en siete segmentos.
+  00000000            00059 CAR_NULL EQU B'00000000'; Caracter nulo en siete segmentos.
+                      00060 ;---------------------------------------------------------------------------------------------
+                      00061 ;
+                      00062 ; Asignación de los bits de los puertos de I/O.
+                      00063 
+                      00064 ; Puerto A.
+  00000000            00065 SIN_USORA0 EQU .0; // Sin Uso RA0.
+  00000001            00066 SIN_USORA1 EQU .1; // Sin Uso RA1.
+  00000002            00067 SIN_USORA2 EQU .2; // Sin Uso RA2.
+  00000003            00068 SIN_USORA3 EQU .3; // Sin Uso RA3.
+  00000004            00069 SIN_USORA4 EQU .4; // Sin Uso RA4.
+  00000005            00070 SIN_USORA5 EQU .5; // Sin Uso RA5.
+                      00071 
+  0000003F            00072 PROGA EQU B'111111'; // Programación inicial del puerto A.
+                      00073 
+                      00074 ; Puerto B.
+  00000000            00075 SEG_A EQU .0; // Segmento a del bus de segmentos.
+  00000001            00076 SEG_B EQU .1; // Segmento b del bus de segmentos.
+  00000002            00077 SEG_C EQU .2; // Segmento c del bus de segmentos.
+  00000003            00078 SEG_D EQU .3; // Segmento d del bus de segmentos.
+  00000004            00079 SEG_E EQU .4; // Segmento e del bus de segmentos.
+  00000005            00080 SEG_F EQU .5; // Segmento f del bus de segmentos.
+  00000006            00081 SEG_G EQU .6; // Segmento g del bus de segmentos.
+  00000007            00082 SEG_DP EQU .7; // Segmento dp del bus de segmentos.
+                      00083 
+  00000000            00084 PROGB EQU B'00000000'; // Programación inicial del puerto B.
+                      00085 
+                      00086 ;Puerto C.
+  00000000            00087 BIT_0 EQU .0; // Sin Uso RC0.
+  00000001            00088 BIT_1 EQU .1; // Sin Uso RC1.
+  00000002            00089 BIT_2 EQU .2; // Sin Uso RC2.
+  00000003            00090 BIT_3 EQU .3; // Sin Uso RC3.
+  00000004            00091 OPR_2 EQU .4; // Sin Uso RC4.
+  00000005            00092 OPR_1 EQU .5; // Sin Uso RC5.
+  00000006            00093 SET_DIG EQU .6; // Sin Uso RC6.
+  00000007            00094 SET_NUM EQU .7; // Sin Uso RC7.
+                      00095 
+  00000000            00096 PROGC EQU B'00000000'; // Programación inicial del puerto C como entradas.
+                      00097 
+                      00098 ;Puerto D.
+  00000000            00099 COM_DISP0 EQU .0; // Bit que controla el común del display 0.
+  00000001            00100 COM_DISP1 EQU .1; // Bit que controla el común del display 1.
+  00000002            00101 COM_DISP2 EQU .2; // Bit que controla el común del display 2.
+  00000003            00102 COM_DISP3 EQU .3; // Bit que controla el común del display 3.
+  00000004            00103 COM_DISP4 EQU .4; // Bit que controla el común del display 4.
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000005            00104 COM_DISP5 EQU .5; // Bit que controla el común del display 5.
+  00000006            00105 COM_DISP6 EQU .6; // Bit que controla el común del display 6.
+  00000007            00106 COM_DISP7 EQU .7; // Bit que controla el común del display 7.
+                      00107 
+  00000000            00108 PROGD EQU B'00000000'; // Programación inicial del puerto D como salidas.
+                      00109 
+                      00110 ;Puerto E.
+  00000000            00111 SIN_USORE0 EQU .0; // Sin Uso RE0.
+  00000001            00112 SIN_USORE1 EQU .1; // Sin Uso RE1.
+  00000001            00113 SIN_USORE2 EQU .1; // Sin Uso RE2.
+                      00114 
+  00000007            00115 PROGE EQU B'111'; // Programación inicial del puerto E.
+                      00116 ;---------------------------------------------------------------------------------------------
+                      00117                         ;====================
+                      00118                         ;== Vector reset ==
+                      00119                         ;====================
+0000                  00120                         ORG 0X0000;
+0000   018A           00121 VEC_RESET       CLRF PCLATH;
+0001   281A           00122                         GOTO PROG_PRIN;
+                      00123 
+                      00124 ;---------------------------------------------------------------------------------------------
+                      00125                         ;==============================
+                      00126                         ;== Vector de interrupción ==
+                      00127                         ;==============================
+0004                  00128                         ORG 0X0004;
+0004   0000           00129 VEC_INT         NOP;
+                      00130 
+0005   0009           00131                         RETFIE;
+                      00132 
+                      00133 ;---------------------------------------------------------------------------------------------
+                      00134                         ;===========================
+                      00135                         ;== Subrutina de inicio ==
+                      00136                         ;===========================
+0006   1683           00137 PROG_INI        BSF STATUS,RP0;
+0007   3081           00138                         MOVLW 0X81;
+0008   0081           00139                         MOVWF OPTION_REG ^0X80;
+0009   303F           00140                         MOVLW PROGA;
+000A   0085           00141                         MOVWF TRISA ^0X80;
+000B   3000           00142                         MOVLW PROGB;
+000C   0086           00143                         MOVWF TRISB ^0X80;
+000D   3000           00144                         MOVLW PROGC;
+000E   0087           00145                         MOVWF TRISC ^0X80;
+000F   3000           00146                         MOVLW PROGD;
+0010   0088           00147                         MOVWF TRISD ^0X80;
+0011   3007           00148                         MOVLW PROGE;
+0012   0089           00149                         MOVWF TRISE ^0X80;
+0013   3006           00150                         MOVLW 0X06;
+0014   009F           00151                         MOVWF ADCON1 ^0X80;
+0015   1283           00152                         BCF STATUS,RP0;
+                      00153 
+0016   0186           00154                         CLRF PORTB;
+                      00155                         
+0017   30FF           00156                         MOVLW B'11111111';
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0018   0088           00157                         MOVWF PORTD;
+                      00158 
+0019   0008           00159                         RETURN;
+                      00160 
+                      00161 ;---------------------------------------------------------------------------------------------
+                      00162                         ;==========================
+                      00163                         ;== Programa principal ==
+                      00164                         ;==========================
+001A   2006           00165 PROG_PRIN       CALL PROG_INI;
+                      00166 
+001B   201F           00167 LOOP_PRI        CALL INT_DATOS;
+001C   2024           00168                         CALL MUESTRA_TIME;
+001D   2032           00169                         CALL ARMA_TIEMPO;
+                      00170 
+001E   281B           00171                         GOTO LOOP_PRI;
+                      00172 ;---------------------------------------------------------------------------------------------
+                      00173                                 ;=======================================
+                      00174                                 ;== Subrutina que checa el exterior ==
+                      00175                                 ;=======================================
+                      00176                                 
+Warning[202]: Argument out of range.  Least significant bits used.
+001F   0887           00177 INT_DATOS       MOVF PORTC,NUM_EXT;
+0020   300F           00178                         MOVLW 0X0F;
+0021   0525           00179                         ANDWF NUM_EXT,W;
+0022   00A6           00180                         MOVWF NUM_EXT_DW;
+0023   0008           00181                         RETURN;
+                      00182                         
+                      00183 ;---------------------------------------------------------------------------------------------
+                      00184                                 ;=======================================
+                      00185                                 ;== Subrutina que muestra el tiempo ==
+                      00186                                 ;=======================================
+0024   302E           00187 MUESTRA_TIME    MOVLW .46;                              1u
+0025   00A1           00188                                 MOVWF CONTADOR2;                1u
+0026   30FF           00189 LOOP1                   MOVLW .255;                             1u
+0027   00A0           00190                                 MOVWF CONTADOR1;                1u
+                      00191 
+0028   0824           00192 BARRE_DISPLAY   MOVF COD7SEG_DIS_1,W;
+0029   0086           00193                                 MOVWF PORTB;
+002A   1388           00194                                 BCF PORTD,COM_DISP7;
+002B   207D           00195                                 CALL RETARDO_1MS;
+002C   1788           00196                                 BSF PORTD,COM_DISP7;
+                      00197 
+002D   0BA0           00198                                 DECFSZ CONTADOR1,F;
+002E   2828           00199                                 GOTO BARRE_DISPLAY;
+002F   0BA1           00200                                 DECFSZ CONTADOR2,F;
+0030   2826           00201                                 GOTO LOOP1;
+                      00202 
+0031   0008           00203                                 RETURN;
+                      00204 ;---------------------------------------------------------------------------------------------
+                      00205 
+                      00206                                 ;====================================
+                      00207                                 ;== Subrutina que arma el tiempo ==
+                      00208                                 ;====================================
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0032   0826           00209 ARMA_TIEMPO             MOVF NUM_EXT_DW,W;
+0033   00A7           00210                                 MOVWF RESP_NUM;
+0034   2038           00211                                 CALL CONV_A_HEX7SEG;
+0035   0827           00212                                 MOVF RESP_NUM,W;
+0036   00A4           00213                                 MOVWF COD7SEG_DIS_1;
+                      00214 
+0037   0008           00215                                 RETURN;
+                      00216 
+                      00217 ;---------------------------------------------------------------------------------------------
+                      00218                                 ;=======================================
+                      00219                                 ;== Subrutina que conv. a 7 segmentos ==
+                      00220                                 ;=======================================
+0038                  00221 CONV_A_HEX7SEG  
+0038   0227           00222                                 SUBWF RESP_NUM,W;
+0039   1903           00223                                 BTFSC STATUS,Z;
+003A   285F           00224                                 GOTO FUE_0;
+                      00225 
+003B   3001           00226                                 MOVLW .1;
+003C   0227           00227                                 SUBWF RESP_NUM,W;
+003D   1903           00228                                 BTFSC STATUS,Z;
+003E   2862           00229                                 GOTO FUE_1;
+                      00230 
+003F   3002           00231                                 MOVLW .2;
+0040   0227           00232                                 SUBWF RESP_NUM,W;
+0041   1903           00233                                 BTFSC STATUS,Z;
+0042   2865           00234                                 GOTO FUE_2;
+                      00235 
+0043   3003           00236                                 MOVLW .3;
+0044   0227           00237                                 SUBWF RESP_NUM,W;
+0045   1903           00238                                 BTFSC STATUS,Z;
+0046   2868           00239                                 GOTO FUE_3;
+                      00240 
+0047   3004           00241                                 MOVLW .4;
+0048   0227           00242                                 SUBWF RESP_NUM,W;
+0049   1903           00243                                 BTFSC STATUS,Z;
+004A   286B           00244                                 GOTO FUE_4;
+                      00245 
+004B   3005           00246                                 MOVLW .5;
+004C   0227           00247                                 SUBWF RESP_NUM,W;
+004D   1903           00248                                 BTFSC STATUS,Z;
+004E   286E           00249                                 GOTO FUE_5;
+                      00250 
+004F   3006           00251                                 MOVLW .6;
+0050   0227           00252                                 SUBWF RESP_NUM,W;
+0051   1903           00253                                 BTFSC STATUS,Z;
+0052   2871           00254                                 GOTO FUE_6;
+                      00255 
+0053   3007           00256                                 MOVLW .7;
+0054   0227           00257                                 SUBWF RESP_NUM,W;
+0055   1903           00258                                 BTFSC STATUS,Z;
+0056   2874           00259                                 GOTO FUE_7;
+                      00260 
+0057   3008           00261                                 MOVLW .8;
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0058   0227           00262                                 SUBWF RESP_NUM,W;
+0059   1903           00263                                 BTFSC STATUS,Z;
+005A   2877           00264                                 GOTO FUE_8;
+                      00265 
+005B   3009           00266                                 MOVLW .9;
+005C   0227           00267                                 SUBWF RESP_NUM,W;
+005D   1903           00268                                 BTFSC STATUS,Z;
+005E   287A           00269                                 GOTO FUE_9;
+                      00270 
+005F   303F           00271 FUE_0                   MOVLW CAR_0;
+0060   00A7           00272                                 MOVWF RESP_NUM;
+0061   287C           00273                                 GOTO SALTE_CONV;
+                      00274 
+0062   3006           00275 FUE_1                   MOVLW CAR_1;
+0063   00A7           00276                                 MOVWF RESP_NUM;
+0064   287C           00277                                 GOTO SALTE_CONV;
+                      00278 
+0065   305B           00279 FUE_2                   MOVLW CAR_2;
+0066   00A7           00280                                 MOVWF RESP_NUM;
+0067   287C           00281                                 GOTO SALTE_CONV;
+                      00282 
+0068   304F           00283 FUE_3                   MOVLW CAR_3;
+0069   00A7           00284                                 MOVWF RESP_NUM;
+006A   287C           00285                                 GOTO SALTE_CONV;
+                      00286 
+006B   3066           00287 FUE_4                   MOVLW CAR_4;
+006C   00A7           00288                                 MOVWF RESP_NUM;
+006D   287C           00289                                 GOTO SALTE_CONV;
+                      00290 
+006E   306D           00291 FUE_5                   MOVLW CAR_5;
+006F   00A7           00292                                 MOVWF RESP_NUM;
+0070   287C           00293                                 GOTO SALTE_CONV;
+                      00294 
+0071   307D           00295 FUE_6                   MOVLW CAR_6;
+0072   00A7           00296                                 MOVWF RESP_NUM;
+0073   287C           00297                                 GOTO SALTE_CONV;
+                      00298 
+0074   3007           00299 FUE_7                   MOVLW CAR_7;
+0075   00A7           00300                                 MOVWF RESP_NUM;
+0076   287C           00301                                 GOTO SALTE_CONV;
+                      00302 
+0077   307F           00303 FUE_8                   MOVLW CAR_8;
+0078   00A7           00304                                 MOVWF RESP_NUM;
+0079   287C           00305                                 GOTO SALTE_CONV;
+                      00306 
+007A   3067           00307 FUE_9                   MOVLW CAR_9;
+007B   00A7           00308                                 MOVWF RESP_NUM;
+                      00309 
+007C   0008           00310 SALTE_CONV              RETURN;
+                      00311 
+                      00312 ;---------------------------------------------------------------------------------------------
+                      00313                                 ;================================================
+                      00314                                 ;== Subrutina de retardo de tiempo de 7 micros ==
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00315                                 ;================================================
+007D   3001           00316 RETARDO_1MS             MOVLW .1;
+007E   00A3           00317                                 MOVWF CONTADOR4;
+                      00318 
+007F   0BA3           00319 LOOP3                   DECFSZ CONTADOR4,F;
+0080   287F           00320                                 GOTO LOOP3;
+                      00321 
+0081   0008           00322                                 RETURN;
+                      00323 ;---------------------------------------------------------------------------------------------
+                      00324                                 END
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ARMA_TIEMPO                       00000032
+BARRE_DISPLAY                     00000028
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BIT_0                             00000000
+BIT_1                             00000001
+BIT_2                             00000002
+BIT_3                             00000003
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CAR_0                             0000003F
+CAR_1                             00000006
+CAR_2                             0000005B
+CAR_3                             0000004F
+CAR_4                             00000066
+CAR_5                             0000006D
+CAR_6                             0000007D
+CAR_7                             00000007
+CAR_8                             0000007F
+CAR_9                             00000067
+CAR_NULL                          00000000
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+CHS1                              00000004
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+COD7SEG_DIS_1                     00000024
+COM_DISP0                         00000000
+COM_DISP1                         00000001
+COM_DISP2                         00000002
+COM_DISP3                         00000003
+COM_DISP4                         00000004
+COM_DISP5                         00000005
+COM_DISP6                         00000006
+COM_DISP7                         00000007
+CONTADOR1                         00000020
+CONTADOR2                         00000021
+CONTADOR3                         00000022
+CONTADOR4                         00000023
+CONV_A_HEX7SEG                    00000038
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+D_A                               00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+FUE_0                             0000005F
+FUE_1                             00000062
+FUE_2                             00000065
+FUE_3                             00000068
+FUE_4                             0000006B
+FUE_5                             0000006E
+FUE_6                             00000071
+FUE_7                             00000074
+FUE_8                             00000077
+FUE_9                             0000007A
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+INT_DATOS                         0000001F
+IRP                               00000007
+LOOP1                             00000026
+LOOP3                             0000007F
+LOOP_PRI                          0000001B
+MUESTRA_TIME                      00000024
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_WRITE                         00000002
+NUM_EXT                           00000025
+NUM_EXT_DW                        00000026
+OBF                               00000006
+OERR                              00000001
+OPR_1                             00000005
+OPR_2                             00000004
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PROGA                             0000003F
+PROGB                             00000000
+PROGC                             00000000
+PROGD                             00000000
+PROGE                             00000007
+PROG_INI                          00000006
+PROG_PRIN                         0000001A
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+R                                 00000002
+RBIE                              00000003
+RBIF                              00000000
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RD                                00000000
+READ_WRITE                        00000002
+RESP_NUM                          00000027
+RETARDO_1MS                       0000007D
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+R_W                               00000002
+S                                 00000003
+SALTE_CONV                        0000007C
+SEG_A                             00000000
+SEG_B                             00000001
+SEG_C                             00000002
+SEG_D                             00000003
+SEG_DP                            00000007
+SEG_E                             00000004
+SEG_F                             00000005
+SEG_G                             00000006
+SEN                               00000000
+SET_DIG                           00000006
+SET_NUM                           00000007
+SIN_USORA0                        00000000
+SIN_USORA1                        00000001
+SIN_USORA2                        00000002
+SIN_USORA3                        00000003
+SIN_USORA4                        00000004
+SIN_USORA5                        00000005
+SIN_USORE0                        00000000
+SIN_USORE1                        00000001
+SIN_USORE2                        00000001
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISB                             00000086
+TRISC                             00000087
+TRISD                             00000088
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+VEC_INT                           00000004
+VEC_RESET                         00000000
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+MPASM  5.30.01                   CALCULADORA.ASM   1-20-2024  0:13:23         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_HS_OSC                           00003FFE
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : XX--XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XX-------------- ---------------- ---------------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   128
+Program Memory Words Free:  8064
+
+
+Errors   :     0
+Warnings :     1 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

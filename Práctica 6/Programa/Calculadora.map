@@ -1,0 +1,82 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Sat Jan 20 00:13:25 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x0000fc
+.config_2007_CALCULADORA.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x000081      
+                            0x002007    0x002007      
+            129 out of 8453 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+              ARMA_TIEMPO   0x000032    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+            BARRE_DISPLAY   0x000028    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+           CONV_A_HEX7SEG   0x000038    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_0   0x00005f    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_1   0x000062    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_2   0x000065    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_3   0x000068    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_4   0x00006b    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_5   0x00006e    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_6   0x000071    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_7   0x000074    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_8   0x000077    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_9   0x00007a    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                INT_DATOS   0x00001f    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    LOOP1   0x000026    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    LOOP3   0x00007f    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                 LOOP_PRI   0x00001b    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+             MUESTRA_TIME   0x000024    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                 PROG_INI   0x000006    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                PROG_PRIN   0x00001a    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+              RETARDO_1MS   0x00007d    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+               SALTE_CONV   0x00007c    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                 PROG_INI   0x000006    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                PROG_PRIN   0x00001a    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                 LOOP_PRI   0x00001b    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                INT_DATOS   0x00001f    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+             MUESTRA_TIME   0x000024    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    LOOP1   0x000026    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+            BARRE_DISPLAY   0x000028    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+              ARMA_TIEMPO   0x000032    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+           CONV_A_HEX7SEG   0x000038    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_0   0x00005f    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_1   0x000062    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_2   0x000065    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_3   0x000068    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_4   0x00006b    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_5   0x00006e    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_6   0x000071    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_7   0x000074    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_8   0x000077    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    FUE_9   0x00007a    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+               SALTE_CONV   0x00007c    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+              RETARDO_1MS   0x00007d    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+                    LOOP3   0x00007f    program     static E:\AMM\Práctica 6\Programa\Calculadora.asm
+
+

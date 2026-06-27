@@ -1,0 +1,136 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Mon May 06 15:12:50 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x00017e
+                   .org_3       code   0x000100    program   0x000288
+.config_2007_GENERADOR DE FUNCIONES.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x0000c2      
+                            0x000100    0x000243      
+                            0x002007    0x002007      
+            518 out of 8453 program addresses used, program memory utilization is 6%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    CARGA   0x00013e    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               CICLO_SUP1   0x00009f    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 CICLO_T1   0x000128    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 CICLO_T2   0x000131    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+              COMANDO_LCD   0x00013d    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                ESP_0.08S   0x000233    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                 ESP_0.1S   0x00022d    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                  ESP_2MS   0x00023f    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                  ESP_5MS   0x000239    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                   ESP_5S   0x000227    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               ESP_INT1MS   0x000221    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                EXPL_TECL   0x000106    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  LCD_INI   0x00004e    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 LIST_FUN   0x00005a    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                LOOP_PRIN   0x000103    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                NO_SIGNAL   0x000063    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                PRINT_LCD   0x00013b    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                 PROG_INI   0x000019    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                PROG_PRIN   0x0000c1    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST1   0x0000a0    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST2   0x0000a8    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST3   0x0000b0    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST4   0x0000b8    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+            RETARDO_0.08S   0x000232    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+             RETARDO_0.1S   0x00022c    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              RETARDO_1MS   0x000220    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              RETARDO_2MS   0x00023e    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              RETARDO_5MS   0x000238    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               RETARDO_5S   0x000226    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               RUTINA_INT   0x000036    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  SAL_INT   0x00000f    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SAL_RUTINT   0x00004c    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  SEC_LED   0x00004b    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SENO_LIST1   0x000075    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SENO_LIST2   0x00008a    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  SIG_INT   0x00003e    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SÒAL_SENOI   0x000072    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SÒAL_SQURE   0x000068    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SÒAL_TRIAN   0x00006f    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_1   0x000114    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_2   0x000119    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_3   0x00011e    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_4   0x000123    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 TEXT_INI   0x000145    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                TEXT_MENU   0x000174    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               TEXT_SENOI   0x0001d6    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              TEXT_SQUARE   0x0001b1    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               TEXT_TRIAN   0x0001fb    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                  VEC_INT   0x000004    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                VEC_RESET   0x000000    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  VEC_INT   0x000004    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  SAL_INT   0x00000f    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 PROG_INI   0x000019    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               RUTINA_INT   0x000036    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  SIG_INT   0x00003e    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  SEC_LED   0x00004b    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SAL_RUTINT   0x00004c    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  LCD_INI   0x00004e    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 LIST_FUN   0x00005a    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                NO_SIGNAL   0x000063    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SÒAL_SQURE   0x000068    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SÒAL_TRIAN   0x00006f    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SÒAL_SENOI   0x000072    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SENO_LIST1   0x000075    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               SENO_LIST2   0x00008a    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               CICLO_SUP1   0x00009f    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST1   0x0000a0    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST2   0x0000a8    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST3   0x0000b0    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+               READ_LIST4   0x0000b8    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                PROG_PRIN   0x0000c1    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                LOOP_PRIN   0x000103    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                EXPL_TECL   0x000106    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_1   0x000114    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_2   0x000119    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_3   0x00011e    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                  TECLA_4   0x000123    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 CICLO_T1   0x000128    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                 CICLO_T2   0x000131    program     static D:\AMM\Pr·ctica 4.6\Programa\Generador de Funciones.asm
+                PRINT_LCD   0x00013b    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              COMANDO_LCD   0x00013d    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                    CARGA   0x00013e    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                 TEXT_INI   0x000145    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                TEXT_MENU   0x000174    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              TEXT_SQUARE   0x0001b1    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               TEXT_SENOI   0x0001d6    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               TEXT_TRIAN   0x0001fb    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              RETARDO_1MS   0x000220    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               ESP_INT1MS   0x000221    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+               RETARDO_5S   0x000226    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                   ESP_5S   0x000227    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+             RETARDO_0.1S   0x00022c    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                 ESP_0.1S   0x00022d    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+            RETARDO_0.08S   0x000232    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                ESP_0.08S   0x000233    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              RETARDO_5MS   0x000238    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                  ESP_5MS   0x000239    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+              RETARDO_2MS   0x00023e    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+                  ESP_2MS   0x00023f    program     static D:\AMM\Pr·ctica 4.6\Programa\Textos generador de funciones.inc
+
+

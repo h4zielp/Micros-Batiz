@@ -1,0 +1,1297 @@
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ; CECYT 9 JUAN DE DIOS BATIZ.
+                      00002 ;
+                      00003 ; PRACTICA 0';.
+                      00004 ; MANEJO DE UN LED OSCILANDO A 1 Hz.
+                      00005 ;
+                      00006 ; EQUIPO:       GRUPO: 6IMX.
+                      00007 ;
+                      00008 ; INTEGRANTES:
+                      00009 ;
+                      00010 ; FECHA DE ENTREGA DEL REPORTE.
+                      00011 ;
+                      00012 ; ESTE PROGRAMA CONTROLA UN LED HACIENDOLO OSCILAR A UNA
+                      00013 ; FRECUENCIA DE UN SEGUNDO, UTILIZANDO
+                      00014 ; INTERRUPCIONES CON EL TMR0.
+                      00015 ;
+                      00016 ;--------------------------------------------------------------------------------------------------
+                      00017  LIST   P=16F877A;
+                      00018  
+                      00019  #INCLUDE "c:\Program files (x86)\Microchip\Mpasm Suite\p16f877a.inc"; Cambia la direccion
+                      00001         LIST
+                      00002 ; P16F877A.INC  Standard Header File, Version 1.00    Microchip Technology, Inc.
+                      00400         LIST
+                      00020 
+2007   3F39           00021  __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_OFF & _XT_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF;
+                      00022 ;--------------------------------------------------------------------------------------------------
+                      00023 ;
+                      00024 ; Fosc = 4 MHz.
+                      00025 ; Ciclo de trabajo del PIC = (1/fosc)*4 = 1 µs.
+                      00026 ; T int =(256-tmr0)*(P)*((1/4000000)*4) = 1 ms. // Tiempo de interrupciÛn.
+                      00027 ; tmr0=131, P=8.
+                      00028 ; frec int = 1/ t int = 1 KHz.
+                      00029 ;----------------------------------------------------------------------------------------------------
+                      00030 ;
+                      00031 ;Def. de variables del programa en RAM.
+                      00032 
+  00000020            00033 RESP_W                  EQU 0X20;
+  00000021            00034 RESP_STATUS     EQU 0X21;
+  00000022            00035 RES_PCLATH              EQU 0X22;
+  00000023            00036 RES_FSR                 EQU 0X23;
+  00000024            00037 PRESC_1                 EQU 0X24; .001 100 5
+  00000025            00038 PRESC_2                 EQU 0X25; t int = t intb * presc_1 * presc_2
+  00000026            00039 CONT_SEG                EQU 0X26;
+  00000027            00040 CONT_MILIS              EQU 0X27;
+  00000028            00041 CONT_MILS               EQU 0X28;
+  00000029            00042 SELECT_FUNCION  EQU 0X29;
+  0000002A            00043 CONT_LIST               EQU 0X2A;
+  0000002B            00044 CONT_SEÒAL      EQU 0X2B;
+                      00045 ;---------------------------------------------------------------------------------------------------
+                      00046 ; Def. de constantes a utilizar.
+  00000085            00047 TMB     EQU     .133;
+                      00048 ;---------------------------------------------------------------------------------------------------
+                      00049 
+                      00050 ; Def. de Ptos. I/0.
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00051 
+                      00052 ; Puerto A.
+  00000000            00053 LCD_R#S EQU .0;
+  00000001            00054 LCD_E EQU .1;
+  00000002            00055 SIN_USORA2 EQU .2;
+  00000003            00056 SIN_USORA3 EQU .3;
+  00000004            00057 SIN_USORA4 EQU .4;
+  00000005            00058 SIN_USORA5 EQU .5;
+                      00059 
+  0000003C            00060 PROGA EQU B'111100';Def. la config. de los bits del pto. a.
+                      00061 
+                      00062 ;Puerto B.
+  00000000            00063 RENGLON_1 EQU .0;
+  00000001            00064 RENGLON_2 EQU .1;
+  00000002            00065 RENGLON_3 EQU .2;
+  00000003            00066 RENGLON_4 EQU .3;
+  00000004            00067 COLUMNA_1 EQU .4;
+  00000005            00068 COLUMNA_2 EQU .5;
+  00000006            00069 COLUMNA_3 EQU .6;
+  00000007            00070 COLUMNA_4 EQU .7;
+                      00071 
+  000000F0            00072 PROGB EQU B'11110000'; // ProgramaciÛn inicial del puerto B.
+                      00073 
+                      00074 ;Puerto C.
+  00000000            00075 LCD_D0 EQU .0;
+  00000001            00076 LCD_D1 EQU .1;
+  00000002            00077 LCD_D2 EQU .2;
+  00000003            00078 LCD_D3 EQU .3;
+  00000004            00079 LCD_D4 EQU .4;
+  00000005            00080 LCD_D5 EQU .5;
+  00000006            00081 LCD_D6 EQU .6;
+  00000007            00082 LCD_D7 EQU .7;
+                      00083 
+  00000000            00084 PROGC EQU B'00000000';Def.
+                      00085 
+                      00086 ;Puerto D.
+  00000000            00087 DAC_0 EQU .0;
+  00000001            00088 DAC_1 EQU .1;
+  00000002            00089 DAC_2 EQU .2;
+  00000003            00090 DAC_3 EQU .3;
+  00000004            00091 DAC_4 EQU .4;
+  00000005            00092 DAC_5 EQU .5;
+  00000006            00093 DAC_6 EQU .6;
+  00000007            00094 DAC_7 EQU .7;
+                      00095 
+  00000000            00096 PROGD EQU B'00000000'; // ProgramaciÛn inicial del puerto C como 
+                      00097                                                  ;Entrada.
+                      00098                                                  
+                      00099 ; Puerto E.
+  00000000            00100 SIN_USORE0 EQU .0;
+  00000001            00101 SIN_USORE1 EQU .1;
+  00000002            00102 LED_ROJO   EQU .2;
+                      00103 
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000003            00104 PROGE EQU B'011';Def. la encua.
+                      00105 ;-------------------------------------------------------------------------------------------------
+                      00106 
+                      00107                         ;=================
+                      00108                         ;== Vector Reset ==
+                      00109                         ;=================
+0000                  00110                         ORG 0X00;
+0000   018A           00111 VEC_RESET       CLRF PCLATH;
+0001   28C1           00112                         GOTO PROG_PRIN;
+                      00113 ;-------------------------------------------------------------------------------------------------
+                      00114 
+                      00115                         ;=============================
+                      00116                         ;== Subrutina de Interrupciones ==
+                      00117                         ;=============================
+                      00118                         
+0004                  00119                         ORG 0X04;
+0004   00A0           00120 VEC_INT         MOVWF RESP_W;resp. esl estado del reg. w.
+0005   0803           00121                         MOVF STATUS,W;
+0006   00A1           00122                         MOVWF RESP_STATUS;resp. banderas de la alu.
+0007   0183           00123                         CLRF STATUS;
+0008   080A           00124                         MOVF PCLATH,W;
+0009   00A2           00125                         MOVWF RES_PCLATH;
+000A   018A           00126                         CLRF PCLATH;
+000B   0804           00127                         MOVF FSR,W;
+000C   00A3           00128                         MOVWF RES_FSR;
+                      00129 
+000D   190B           00130                         BTFSC INTCON,T0IF;
+000E   2036           00131                         CALL RUTINA_INT;
+                      00132 
+000F   0823           00133 SAL_INT         MOVF RES_FSR,W;
+0010   0084           00134                         MOVWF FSR;
+0011   0822           00135                         MOVF RES_PCLATH,W;
+0012   008A           00136                         MOVWF PCLATH;
+0013   0821           00137                         MOVF RESP_STATUS,W;
+0014   0083           00138                         MOVWF STATUS;
+0015   0820           00139                         MOVF RESP_W,W;
+0016   3085           00140                         MOVLW TMB;
+0017   0081           00141                         MOVWF TMR0;
+                      00142                         
+0018   0009           00143                         RETFIE;
+                      00144 ;--------------------------------------------------------------------------------------------------
+                      00145 
+                      00146                         ;================================
+                      00147                         ;== Subrutina de Ini. de Reg. del Pic ==
+                      00148                         ;================================
+                      00149 
+0019   1683           00150 PROG_INI        BSF STATUS,RP0; Ponte en el banco 1 de ram.
+001A   3002           00151                         MOVLW 0X02;
+001B   0081           00152                         MOVWF OPTION_REG ^0X80;
+001C   303C           00153                         MOVLW PROGA;
+001D   0085           00154                         MOVWF TRISA ^0X80;
+001E   30F0           00155                         MOVLW PROGB;
+001F   0086           00156                         MOVWF TRISB ^0X80;
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0020   3000           00157                         MOVLW PROGC;
+0021   0087           00158                         MOVWF TRISC ^0X80;
+0022   3000           00159                         MOVLW PROGD;
+0023   0088           00160                         MOVWF TRISD ^0X80;
+0024   3003           00161                         MOVLW PROGE;
+0025   0089           00162                         MOVWF TRISE ^0X80;
+0026   3006           00163                         MOVLW 0X06;
+0027   009F           00164                         MOVWF ADCON1 ^0X80;
+                      00165                         
+0028   1283           00166                         BCF STATUS,RP0; Ponte en el banco 0 de ram.
+0029   1303           00167                         BCF STATUS,RP1; Ponte en el banco 0 de ram.     
+                      00168                         
+002A   30A0           00169                         MOVLW 0XA0;
+002B   008B           00170                         MOVWF INTCON;
+002C   3085           00171                         MOVLW TMB;
+002D   0081           00172                         MOVWF TMR0;
+                      00173                         
+002E   3000           00174                         MOVLW 0X00;
+002F   0087           00175                         MOVWF PORTC;
+0030   0088           00176                         MOVWF PORTD;
+0031   00AA           00177                         MOVWF CONT_LIST;
+0032   00A9           00178                         MOVWF SELECT_FUNCION;
+                      00179                         
+0033   30FF           00180                         MOVLW 0XFF;
+0034   0086           00181                         MOVWF PORTB;                    
+0035   0008           00182                         RETURN;
+                      00183 ;--------------------------------------------------------------------------------------------------
+                      00184 
+                      00185                         ;=============================
+                      00186                         ;== Subrutina de Interrupciones ==
+                      00187                         ;=============================
+                      00188                         
+0036   0AA7           00189 RUTINA_INT      INCF CONT_MILIS,F;
+0037   0AA4           00190                         INCF PRESC_1,F;
+                      00191 
+0038   3064           00192                         MOVLW .100;
+0039   0624           00193                         XORWF PRESC_1,W;
+003A   1D03           00194                         BTFSS STATUS,Z;
+003B   284C           00195                         GOTO SAL_RUTINT;
+003C   0AA8           00196                         INCF CONT_MILS,F;
+003D   283E           00197                         GOTO SIG_INT;
+                      00198 
+003E   01A4           00199 SIG_INT         CLRF PRESC_1;
+003F   0AA5           00200                         INCF PRESC_2,F;
+0040   300A           00201                         MOVLW .10;
+0041   0625           00202                         XORWF PRESC_2,W;
+0042   1D03           00203                         BTFSS STATUS,Z;
+0043   284C           00204                         GOTO SAL_RUTINT;
+0044   01A4           00205                         CLRF PRESC_1;
+0045   01A5           00206                         CLRF PRESC_2;
+                      00207                         
+0046   0AA6           00208                         INCF CONT_SEG,F;
+                      00209                         
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0047   1D09           00210                         BTFSS PORTE,LED_ROJO;
+0048   284B           00211                         GOTO SEC_LED;
+0049   1109           00212                         BCF PORTE,LED_ROJO; Prende el led.
+004A   284C           00213                         GOTO SAL_RUTINT;
+                      00214                         
+004B   1509           00215 SEC_LED         BSF PORTE,LED_ROJO; Apaga el led.
+                      00216 
+004C   110B           00217 SAL_RUTINT      BCF INTCON,T0IF;
+                      00218                         
+004D   0008           00219                         RETURN;
+                      00220 ;--------------------------------------------------------------------------------------------------
+                      00221                         ;=====================
+                      00222                         ;== Inicializar LCD ==
+                      00223                         ;=====================
+004E   1485           00224 LCD_INI         BSF PORTA,LCD_E;        ;Pulso en alto inicial del Enable
+                      00225 
+004F   3038           00226                         MOVLW 0X38;
+0050   213D           00227                         CALL COMANDO_LCD;
+0051   3001           00228                         MOVLW 0X01;
+0052   213D           00229                         CALL COMANDO_LCD;
+0053   3006           00230                         MOVLW 0X06;
+0054   213D           00231                         CALL COMANDO_LCD;
+0055   300C           00232                         MOVLW 0X0C;
+0056   213D           00233                         CALL COMANDO_LCD;
+0057   3080           00234                         MOVLW 0X80;
+0058   213D           00235                         CALL COMANDO_LCD;
+                      00236                         
+0059   0008           00237                         RETURN;
+                      00238 ;---------------------------------------------------------------------------------------------
+                      00239 ;Listas
+                      00240                         ;A quÌ van las listas que se requieran                  
+                      00241 
+                      00242                         ;========================
+                      00243                         ;== Lista de funciones ==
+                      00244                         ;========================
+005A   0829           00245 LIST_FUN        MOVF SELECT_FUNCION,W;  |
+005B   0782           00246                         ADDWF PCL,F;                     |
+005C   2863           00247                         GOTO NO_SIGNAL;                   |
+005D   2868           00248                         GOTO SÒAL_SQURE;                    |
+005E   286F           00249                 GOTO SÒAL_TRIAN;                     | Esta es la estructura b·sica de una lista
+005F   2872           00250                         GOTO SÒAL_SENOI;                    |
+0060   0000           00251                         NOP;                                      |
+0061   0000           00252                         NOP;                                     |
+0062   0008           00253                         RETURN;                                 |
+                      00254 
+0063   3080           00255 NO_SIGNAL       MOVLW 0X80;
+0064   0088           00256                         MOVWF PORTD;
+0065   2232           00257                         CALL RETARDO_0.08S;
+0066   2232           00258                         CALL RETARDO_0.08S;
+0067   0008           00259                         RETURN;
+                      00260                         
+0068   30FF           00261 SÒAL_SQURE      MOVLW 0XFF;
+0069   0088           00262                         MOVWF PORTD;
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+006A   2232           00263                         CALL RETARDO_0.08S;             El la tasa de muestreo depende de la cantidad de
+                             muestras que tengas
+006B   3080           00264                         MOVLW 0X80;
+006C   0088           00265                         MOVWF PORTD;
+006D   2232           00266                         CALL RETARDO_0.08S;
+006E   0008           00267                         RETURN;
+                      00268 
+006F   01AB           00269 SÒAL_TRIAN  CLRF CONT_SEÒAL;
+0070   2128           00270             CALL CICLO_T1;  
+0071   0008           00271             RETURN;
+                      00272 
+0072   01AB           00273 SÒAL_SENOI  CLRF CONT_SEÒAL;
+0073   209F           00274             CALL CICLO_SUP1;  
+0074   0008           00275             RETURN;
+                      00276                         
+                      00277 ;----------------------------------------------------------------------------------------------
+                      00278 ;CICLOS SE—AL SENOIDAL
+0075   082A           00279 SENO_LIST1      MOVF CONT_LIST,W;
+0076   0782           00280                         ADDWF PCL,F;
+0077   0000           00281                         NOP;
+                      00282 
+0078   347F           00283                         RETLW 0X7F; Se representara en el DAC 2.50V
+0079   348B           00284                         RETLW 0X8B; Se representara en el DAC 2.75V
+007A   3498           00285                         RETLW 0X98; Se representara en el DAC 2.99V
+007B   34A4           00286                         RETLW 0XA4; Se representara en el DAC 3.23V
+007C   34B0           00287                         RETLW 0XB0; Se representara en el DAC 3.46V
+007D   34BB           00288                         RETLW 0XBB; Se representara en el DAC 3.68V
+007E   34C6           00289                         RETLW 0XC6; Se representara en el DAC 3.89V
+007F   34D0           00290                         RETLW 0XD0; Se representara en el DAC 4.09V
+                      00291 
+0080   34D9           00292                         RETLW 0XD9; Se representara en el DAC 4.27V
+0081   34E1           00293                         RETLW 0XE1; Se representara en el DAC 4.43V
+0082   34E9           00294                         RETLW 0XE9; Se representara en el DAC 4.58V
+0083   34EF           00295                         RETLW 0XEF; Se representara en el DAC 4.70V
+0084   34F4           00296                         RETLW 0XF4; Se representara en el DAC 4.81V
+0085   34F9           00297                         RETLW 0XF9; Se representara en el DAC 4.89V
+0086   34FC           00298                         RETLW 0XFC; Se representara en el DAC 4.95V
+0087   34FD           00299                         RETLW 0XFD; Se representara en el DAC 4.99V
+0088   34FF           00300                         RETLW 0XFF; Se representara en el DAC 5.00V
+                      00301 
+0089   0008           00302                         RETURN;
+                      00303 
+008A   082A           00304 SENO_LIST2      MOVF CONT_LIST,W;
+008B   0782           00305                         ADDWF PCL,F;
+008C   0000           00306                         NOP;
+                      00307 
+008D   347F           00308                         RETLW 0X7F; Se representara en el DAC 2.50V
+008E   3473           00309                         RETLW 0X73; Se representara en el DAC 2.25V
+008F   3466           00310                         RETLW 0X66; Se representara en el DAC 2.01V
+0090   345A           00311                         RETLW 0X5A; Se representara en el DAC 1.77V
+0091   344E           00312                         RETLW 0X4E; Se representara en el DAC 3.54V
+0092   3443           00313                         RETLW 0X43; Se representara en el DAC 3.76V
+0093   3438           00314                         RETLW 0X38; Se representara en el DAC 3.97V
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0094   342E           00315                         RETLW 0X2E; Se representara en el DAC 4.16V
+                      00316 
+0095   3425           00317                         RETLW 0X25; Se representara en el DAC 4.33V
+0096   341D           00318                         RETLW 0X1D; Se representara en el DAC 4.48V
+0097   3415           00319                         RETLW 0X15; Se representara en el DAC 4.62V
+0098   340F           00320                         RETLW 0X0F; Se representara en el DAC 4.73V
+0099   340A           00321                         RETLW 0X0A; Se representara en el DAC 4.83V
+009A   3405           00322                         RETLW 0X05; Se representara en el DAC 4.90V
+009B   3402           00323                         RETLW 0X02; Se representara en el DAC 4.96V
+009C   3401           00324                         RETLW 0X01; Se representara en el DAC 4.98V
+009D   3400           00325                         RETLW 0X00; Se representara en el DAC 4.99V
+                      00326 
+009E   0008           00327                         RETURN;
+                      00328 
+                      00329 ;Leer lista Senoidal
+009F   01AA           00330 CICLO_SUP1  CLRF CONT_LIST;
+                      00331                         
+00A0   0AAA           00332 READ_LIST1      INCF CONT_LIST,F;
+00A1   2075           00333                         CALL SENO_LIST1;
+00A2   0088           00334                         MOVWF PORTD;
+00A3   223E           00335                         CALL RETARDO_2MS
+                      00336 
+00A4   3011           00337                         MOVLW .17;
+00A5   022A           00338                         SUBWF CONT_LIST,W;
+00A6   1D03           00339                         BTFSS STATUS,Z;
+00A7   28A0           00340                         GOTO READ_LIST1;
+                      00341 
+00A8   03AA           00342 READ_LIST2      DECF CONT_LIST,F;
+00A9   2075           00343                         CALL SENO_LIST1;
+00AA   0088           00344                         MOVWF PORTD;
+00AB   223E           00345                         CALL RETARDO_2MS
+                      00346 
+00AC   3000           00347                         MOVLW .0;
+00AD   022A           00348                         SUBWF CONT_LIST,W;
+00AE   1D03           00349                         BTFSS STATUS,Z;
+00AF   28A8           00350                         GOTO READ_LIST2;
+                      00351 
+00B0   0AAA           00352 READ_LIST3      INCF CONT_LIST,F;
+00B1   208A           00353                         CALL SENO_LIST2;
+00B2   0088           00354                         MOVWF PORTD;
+00B3   223E           00355                         CALL RETARDO_2MS
+                      00356 
+00B4   3011           00357                         MOVLW .17;
+00B5   022A           00358                         SUBWF CONT_LIST,W;
+00B6   1D03           00359                         BTFSS STATUS,Z;
+00B7   28B0           00360                         GOTO READ_LIST3;
+                      00361 
+00B8   03AA           00362 READ_LIST4      DECF CONT_LIST,F;
+00B9   208A           00363                         CALL SENO_LIST2;
+00BA   0088           00364                         MOVWF PORTD;
+00BB   223E           00365                         CALL RETARDO_2MS
+                      00366 
+00BC   3000           00367                         MOVLW .0;
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00BD   022A           00368                         SUBWF CONT_LIST,W;
+00BE   1D03           00369                         BTFSS STATUS,Z;
+00BF   28B8           00370                         GOTO READ_LIST4;
+                      00371 
+00C0   0008           00372             RETURN;
+                      00373 ;---------------------------------------------------------------------------------------------
+                      00374                         ;=====================
+                      00375                         ;== Programa principal ==
+                      00376                         ;=====================
+                      00377 
+00C1   2019           00378 PROG_PRIN       CALL PROG_INI;
+00C2   204E           00379                         CALL LCD_INI;
+0100                  00380                         ORG 0X0100;
+0100   2145           00381                         CALL TEXT_INI;
+0101   2226           00382                         CALL RETARDO_5S;
+0102   2174           00383                         CALL TEXT_MENU;
+                      00384                         
+0103   2106           00385 LOOP_PRIN       CALL EXPL_TECL;
+0104   2226           00386                     CALL RETARDO_5S;
+                      00387 
+0105   2903           00388                         GOTO LOOP_PRIN;
+                      00389 ;--------------------------------------------------------------------------------------------------
+0106   300E           00390 EXPL_TECL       MOVLW 0X0E;
+0107   0086           00391                         MOVWF PORTB;
+                      00392                         
+0108   1E06           00393                         BTFSS PORTB,COLUMNA_1;
+0109   2914           00394                         GOTO TECLA_1;
+                      00395                         
+010A   1E86           00396                         BTFSS PORTB,COLUMNA_2;
+010B   2919           00397                         GOTO TECLA_2;
+                      00398                         
+010C   1F06           00399                         BTFSS PORTB,COLUMNA_3;
+010D   291E           00400                         GOTO TECLA_3;
+                      00401                         
+010E   300D           00402                         MOVLW 0X0D;
+010F   0086           00403                         MOVWF PORTB;
+                      00404                         
+0110   1E06           00405                         BTFSS PORTB,COLUMNA_1;
+0111   2923           00406                         GOTO TECLA_4;
+                      00407                         
+0112   205A           00408                         CALL LIST_FUN; Genera la funciÛn deseada de manera perpetua hasta ser cambiada p
+                            or el teclado
+0113   2906           00409                         GOTO EXPL_TECL;
+                      00410                         
+0114   21B1           00411 TECLA_1         CALL TEXT_SQUARE;
+0115   222C           00412                         CALL RETARDO_0.1S;
+0116   3001           00413                         MOVLW .1;
+0117   00A9           00414                         MOVWF SELECT_FUNCION;
+0118   2906           00415                         GOTO EXPL_TECL;
+                      00416                         
+0119   21FB           00417 TECLA_2         CALL TEXT_TRIAN;
+011A   222C           00418             CALL RETARDO_0.1S;
+011B   3002           00419                         MOVLW .2;
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+011C   00A9           00420                         MOVWF SELECT_FUNCION;
+011D   2906           00421                         GOTO EXPL_TECL;
+                      00422                         
+011E   21D6           00423 TECLA_3         CALL TEXT_SENOI;
+011F   222C           00424             CALL RETARDO_0.1S;
+0120   3003           00425             MOVLW .3;
+0121   00A9           00426             MOVWF SELECT_FUNCION;
+0122   2906           00427                         GOTO EXPL_TECL;
+                      00428                         
+0123   2174           00429 TECLA_4         CALL TEXT_MENU;
+0124   222C           00430                         CALL RETARDO_0.1S;
+0125   3000           00431                         MOVLW .0;
+0126   00A9           00432                         MOVWF SELECT_FUNCION;
+0127   2906           00433                         GOTO EXPL_TECL;
+                      00434 
+                      00435 ;---------------------------------------------------------------------------------------------
+                      00436 ;CICLOS SE—AL TRIANGULAR
+0128   300F           00437 CICLO_T1    MOVLW .15;
+0129   07AB           00438                         ADDWF CONT_SEÒAL,F;
+012A   082B           00439                         MOVF CONT_SEÒAL,W;
+012B   0088           00440                         MOVWF PORTD;
+012C   2238           00441                         CALL RETARDO_5MS
+                      00442                         
+012D   30FF           00443                         MOVLW .255;
+012E   062B           00444                         XORWF CONT_SEÒAL,W;
+012F   1D03           00445                         BTFSS STATUS,Z;
+0130   2928           00446                         GOTO CICLO_T1;
+                      00447 
+0131   300F           00448 CICLO_T2    MOVLW .15;
+0132   02AB           00449                         SUBWF CONT_SEÒAL,F;
+0133   082B           00450                         MOVF CONT_SEÒAL,W;
+0134   0088           00451                         MOVWF PORTD;
+0135   2238           00452                         CALL RETARDO_5MS
+                      00453                         
+0136   3000           00454                         MOVLW 0X00;
+0137   062B           00455                         XORWF CONT_SEÒAL,W;
+0138   1D03           00456                         BTFSS STATUS,Z;
+0139   2931           00457                         GOTO CICLO_T2;
+                      00458 
+013A   0008           00459                         RETURN;
+                      00460 
+                      00461 ;---------------------------------------------------------------------------------------------
+                      00462                         
+                      00463 #INCLUDE "Textos generador de funciones.inc";                   
+                      00001                         ;=========================================
+                      00002                         ;== Subrutina de HABILITACI”N DE LCD (E) ==
+                      00003                         ;=========================================
+013B   1405           00004 PRINT_LCD       BSF PORTA,LCD_R#S;
+013C   293E           00005                         GOTO CARGA;
+013D   1005           00006 COMANDO_LCD     BCF PORTA,LCD_R#S; Modo comando
+013E   0087           00007 CARGA           MOVWF PORTC;
+                      00008 
+013F   2220           00009                         CALL RETARDO_1MS
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0140   1085           00010                         BCF PORTA,LCD_E;
+0141   2220           00011                         CALL RETARDO_1MS;
+0142   1485           00012                         BSF PORTA,LCD_E;
+0143   2220           00013                         CALL RETARDO_1MS;
+                      00014 
+0144   0008           00015                         RETURN;
+                      00016 ;--------------------------------------------------------------------------------------------------     
+0145   3080           00017 TEXT_INI        MOVLW 0X80;
+0146   213D           00018                         CALL COMANDO_LCD;
+0147   3047           00019                         MOVLW 'G';
+0148   213B           00020                         CALL PRINT_LCD;
+0149   3045           00021                         MOVLW 'E';
+014A   213B           00022                         CALL PRINT_LCD;
+014B   304E           00023                         MOVLW 'N';
+014C   213B           00024                         CALL PRINT_LCD;
+014D   3045           00025                         MOVLW 'E';
+014E   213B           00026                         CALL PRINT_LCD;
+014F   3052           00027                         MOVLW 'R';
+0150   213B           00028                         CALL PRINT_LCD;
+0151   3041           00029                         MOVLW 'A';
+0152   213B           00030                         CALL PRINT_LCD;
+0153   3044           00031                         MOVLW 'D';
+0154   213B           00032                         CALL PRINT_LCD;
+0155   304F           00033                         MOVLW 'O';
+0156   213B           00034                         CALL PRINT_LCD;
+0157   3052           00035                         MOVLW 'R';
+0158   213B           00036                         CALL PRINT_LCD;
+0159   3020           00037                         MOVLW 0X20;
+015A   213B           00038                         CALL PRINT_LCD;
+015B   3044           00039                         MOVLW 'D';
+015C   213B           00040                         CALL PRINT_LCD;
+015D   3045           00041                         MOVLW 'E';
+015E   213B           00042                         CALL PRINT_LCD;
+                      00043                         
+015F   30C0           00044                         MOVLW 0XC0;
+0160   213D           00045                         CALL COMANDO_LCD;
+0161   3046           00046                         MOVLW 'F';
+0162   213B           00047                         CALL PRINT_LCD;
+0163   3055           00048                         MOVLW 'U';
+0164   213B           00049                         CALL PRINT_LCD;
+0165   304E           00050                         MOVLW 'N';
+0166   213B           00051                         CALL PRINT_LCD;
+0167   3043           00052                         MOVLW 'C';
+0168   213B           00053                         CALL PRINT_LCD;
+0169   3049           00054                         MOVLW 'I';
+016A   213B           00055                         CALL PRINT_LCD;
+016B   304F           00056                         MOVLW 'O';
+016C   213B           00057                         CALL PRINT_LCD;
+016D   304E           00058                         MOVLW 'N';
+016E   213B           00059                         CALL PRINT_LCD;
+016F   3045           00060                         MOVLW 'E';
+0170   213B           00061                         CALL PRINT_LCD;
+0171   3053           00062                         MOVLW 'S';
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0172   213B           00063                         CALL PRINT_LCD;
+0173   0008           00064                         RETURN;
+                      00065 
+0174   3001           00066 TEXT_MENU       MOVLW 0X01;
+0175   213D           00067                         CALL COMANDO_LCD;
+0176   3080           00068                         MOVLW 0X80;
+0177   213D           00069                         CALL COMANDO_LCD;
+0178   3053           00070                         MOVLW 'S';
+0179   213B           00071                         CALL PRINT_LCD;
+017A   3045           00072                         MOVLW 'E';
+017B   213B           00073                         CALL PRINT_LCD;
+017C   304C           00074                         MOVLW 'L';
+017D   213B           00075                         CALL PRINT_LCD;
+017E   3045           00076                         MOVLW 'E';
+017F   213B           00077                         CALL PRINT_LCD;
+0180   3043           00078                         MOVLW 'C';
+0181   213B           00079                         CALL PRINT_LCD;
+0182   3043           00080                         MOVLW 'C';
+0183   213B           00081                         CALL PRINT_LCD;
+0184   3049           00082                         MOVLW 'I';
+0185   213B           00083                         CALL PRINT_LCD;
+0186   304F           00084                         MOVLW 'O';
+0187   213B           00085                         CALL PRINT_LCD;
+0188   304E           00086                         MOVLW 'N';
+0189   213B           00087                         CALL PRINT_LCD;
+018A   3041           00088                         MOVLW 'A';
+018B   213B           00089                         CALL PRINT_LCD;
+018C   3020           00090                         MOVLW 0X20;
+018D   213B           00091                         CALL PRINT_LCD;
+018E   3055           00092                         MOVLW 'U';
+018F   213B           00093                         CALL PRINT_LCD;
+0190   304E           00094                         MOVLW 'N';
+0191   213B           00095                         CALL PRINT_LCD;
+0192   3041           00096                         MOVLW 'A';
+0193   213B           00097                         CALL PRINT_LCD;
+                      00098                         
+0194   30C0           00099                         MOVLW 0XC0;
+0195   213D           00100                         CALL COMANDO_LCD;
+0196   304F           00101                         MOVLW 'O';
+0197   213B           00102                         CALL PRINT_LCD;
+0198   3050           00103                         MOVLW 'P';
+0199   213B           00104                         CALL PRINT_LCD;
+019A   3043           00105                         MOVLW 'C';
+019B   213B           00106                         CALL PRINT_LCD;
+019C   3049           00107                         MOVLW 'I';
+019D   213B           00108                         CALL PRINT_LCD;
+019E   304F           00109                         MOVLW 'O';
+019F   213B           00110                         CALL PRINT_LCD;
+01A0   304E           00111                         MOVLW 'N';
+01A1   213B           00112                         CALL PRINT_LCD;
+01A2   303A           00113                         MOVLW ':';
+01A3   213B           00114                         CALL PRINT_LCD;
+01A4   3020           00115                         MOVLW 0X20;
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 12
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01A5   213B           00116                         CALL PRINT_LCD;
+01A6   3031           00117                         MOVLW '1';
+01A7   213B           00118                         CALL PRINT_LCD
+01A8   3020           00119                         MOVLW 0X20;
+01A9   213B           00120                         CALL PRINT_LCD;
+01AA   3032           00121                         MOVLW '2';
+01AB   213B           00122                         CALL PRINT_LCD
+01AC   3020           00123                         MOVLW 0X20;
+01AD   213B           00124                         CALL PRINT_LCD;
+01AE   3033           00125                         MOVLW '3';
+01AF   213B           00126                         CALL PRINT_LCD
+01B0   0008           00127                         RETURN;
+                      00128                         
+01B1   3001           00129 TEXT_SQUARE     MOVLW 0X01;
+01B2   213D           00130                         CALL COMANDO_LCD;
+01B3   3080           00131                         MOVLW 0X80;
+01B4   213D           00132                         CALL COMANDO_LCD;
+01B5   3053           00133                         MOVLW 'S';
+01B6   213B           00134                         CALL PRINT_LCD;
+01B7   3045           00135                         MOVLW 'E';
+01B8   213B           00136                         CALL PRINT_LCD;
+01B9   304E           00137                         MOVLW 'N';
+01BA   213B           00138                         CALL PRINT_LCD;
+01BB   3041           00139                         MOVLW 'A';
+01BC   213B           00140                         CALL PRINT_LCD;
+01BD   304C           00141                         MOVLW 'L';
+01BE   213B           00142                         CALL PRINT_LCD;
+01BF   3020           00143                         MOVLW 0X20;
+01C0   213B           00144                         CALL PRINT_LCD;
+01C1   3043           00145                         MOVLW 'C';
+01C2   213B           00146                         CALL PRINT_LCD;
+01C3   3055           00147                         MOVLW 'U';
+01C4   213B           00148                         CALL PRINT_LCD;
+01C5   3041           00149                         MOVLW 'A';
+01C6   213B           00150                         CALL PRINT_LCD;
+01C7   3044           00151                         MOVLW 'D';
+01C8   213B           00152                         CALL PRINT_LCD;
+01C9   3052           00153                         MOVLW 'R';
+01CA   213B           00154                         CALL PRINT_LCD;
+01CB   3041           00155                         MOVLW 'A';
+01CC   213B           00156                         CALL PRINT_LCD;
+01CD   3054           00157                         MOVLW 'T';
+01CE   213B           00158                         CALL PRINT_LCD;
+01CF   3049           00159                         MOVLW 'I';
+01D0   213B           00160                         CALL PRINT_LCD;
+01D1   3043           00161                         MOVLW 'C';
+01D2   213B           00162                         CALL PRINT_LCD;
+01D3   3041           00163                         MOVLW 'A';
+01D4   213B           00164                         CALL PRINT_LCD;
+01D5   0008           00165             RETURN;
+01D6   3001           00166 TEXT_SENOI      MOVLW 0X01;
+01D7   213D           00167                         CALL COMANDO_LCD;
+01D8   3080           00168                         MOVLW 0X80;
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 13
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01D9   213D           00169                         CALL COMANDO_LCD;
+01DA   3053           00170                         MOVLW 'S';
+01DB   213B           00171                         CALL PRINT_LCD;
+01DC   3045           00172                         MOVLW 'E';
+01DD   213B           00173                         CALL PRINT_LCD;
+01DE   304E           00174                         MOVLW 'N';
+01DF   213B           00175                         CALL PRINT_LCD;
+01E0   3041           00176                         MOVLW 'A';
+01E1   213B           00177                         CALL PRINT_LCD;
+01E2   304C           00178                         MOVLW 'L';
+01E3   213B           00179                         CALL PRINT_LCD;
+01E4   3020           00180                         MOVLW 0X20;
+01E5   213B           00181                         CALL PRINT_LCD;
+01E6   3053           00182                         MOVLW 'S';
+01E7   213B           00183                         CALL PRINT_LCD;
+01E8   3045           00184                         MOVLW 'E';
+01E9   213B           00185                         CALL PRINT_LCD;
+01EA   304E           00186                         MOVLW 'N';
+01EB   213B           00187                         CALL PRINT_LCD;
+01EC   304F           00188                         MOVLW 'O';
+01ED   213B           00189                         CALL PRINT_LCD;
+01EE   3049           00190                         MOVLW 'I';
+01EF   213B           00191                         CALL PRINT_LCD;
+01F0   3044           00192                         MOVLW 'D';
+01F1   213B           00193                         CALL PRINT_LCD;
+01F2   3041           00194                         MOVLW 'A';
+01F3   213B           00195                         CALL PRINT_LCD;
+01F4   304C           00196                         MOVLW 'L';
+01F5   213B           00197                         CALL PRINT_LCD;
+01F6   3020           00198                         MOVLW 0X20;
+01F7   213B           00199                         CALL PRINT_LCD;
+01F8   3020           00200                         MOVLW 0X20;
+01F9   213B           00201                         CALL PRINT_LCD;
+01FA   0008           00202             RETURN;
+01FB   3001           00203 TEXT_TRIAN      MOVLW 0X01;
+01FC   213D           00204                         CALL COMANDO_LCD;
+01FD   3080           00205                         MOVLW 0X80;
+01FE   213D           00206                         CALL COMANDO_LCD;
+01FF   3053           00207                         MOVLW 'S';
+0200   213B           00208                         CALL PRINT_LCD;
+0201   3045           00209                         MOVLW 'E';
+0202   213B           00210                         CALL PRINT_LCD;
+0203   304E           00211                         MOVLW 'N';
+0204   213B           00212                         CALL PRINT_LCD;
+0205   3041           00213                         MOVLW 'A';
+0206   213B           00214                         CALL PRINT_LCD;
+0207   304C           00215                         MOVLW 'L';
+0208   213B           00216                         CALL PRINT_LCD;
+0209   3020           00217                         MOVLW 0X20;
+020A   213B           00218                         CALL PRINT_LCD;
+020B   3054           00219                         MOVLW 'T';
+020C   213B           00220                         CALL PRINT_LCD;
+020D   3052           00221                         MOVLW 'R';
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 14
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+020E   213B           00222                         CALL PRINT_LCD;
+020F   3049           00223                         MOVLW 'I';
+0210   213B           00224                         CALL PRINT_LCD;
+0211   3041           00225                         MOVLW 'A';
+0212   213B           00226                         CALL PRINT_LCD;
+0213   304E           00227                         MOVLW 'N';
+0214   213B           00228                         CALL PRINT_LCD;
+0215   3047           00229                         MOVLW 'G';
+0216   213B           00230                         CALL PRINT_LCD;
+0217   3055           00231                         MOVLW 'U';
+0218   213B           00232                         CALL PRINT_LCD;
+0219   304C           00233                         MOVLW 'L';
+021A   213B           00234                         CALL PRINT_LCD;
+021B   3041           00235                         MOVLW 'A';
+021C   213B           00236                         CALL PRINT_LCD;
+021D   3052           00237                         MOVLW 'R';
+021E   213B           00238                         CALL PRINT_LCD;
+021F   0008           00239             RETURN;
+                      00240 ;---------------------------------------------------------------------------------------------
+                      00241                         ;=========================================
+                      00242                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00243                         ;=========================================
+0220   01A7           00244 RETARDO_1MS CLRF CONT_MILIS;
+0221   3001           00245 ESP_INT1MS      MOVLW .1;
+0222   0227           00246                         SUBWF CONT_MILIS,W;
+0223   1D03           00247                         BTFSS STATUS,Z;
+0224   2A21           00248                         GOTO  ESP_INT1MS;
+0225   0008           00249                         RETURN;
+                      00250 ;--------------------------------------------------------------------------------------------------
+                      00251                         ;=========================================
+                      00252                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00253                         ;=========================================
+0226   01A6           00254 RETARDO_5S          CLRF CONT_SEG;
+0227   3005           00255 ESP_5S                  MOVLW .5;
+0228   0226           00256                                 SUBWF CONT_SEG,W;
+0229   1D03           00257                                 BTFSS STATUS,Z;
+022A   2A27           00258                                 GOTO  ESP_5S;
+022B   0008           00259                                 RETURN;
+                      00260 ;---------------------------------------------------------------------------------------------
+                      00261                         ;=========================================
+                      00262                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00263                         ;=========================================
+                      00264 
+022C   01A7           00265 RETARDO_0.1S    CLRF CONT_MILIS;
+022D   3064           00266 ESP_0.1S                MOVLW .100;
+022E   0227           00267                                 SUBWF CONT_MILIS,W;
+022F   1D03           00268                                 BTFSS STATUS,Z;
+0230   2A21           00269                                 GOTO  ESP_INT1MS;
+0231   0008           00270                                 RETURN;
+                      00271 ;--------------------------------------------------------------------------------------------------
+                      00272                         ;=========================================
+                      00273                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00274                         ;=========================================
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 15
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00275 
+0232   01A7           00276 RETARDO_0.08S   CLRF CONT_MILIS;
+0233   304E           00277 ESP_0.08S               MOVLW .78;
+0234   0227           00278                                 SUBWF CONT_MILIS,W;
+0235   1D03           00279                                 BTFSS STATUS,Z;
+0236   2A33           00280                                 GOTO  ESP_0.08S;
+0237   0008           00281                                 RETURN;
+                      00282 ;--------------------------------------------------------------------------------------------------
+                      00283                         ;=========================================
+                      00284                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00285                         ;=========================================
+                      00286 
+0238   01A7           00287 RETARDO_5MS             CLRF CONT_MILIS;
+0239   3005           00288 ESP_5MS                 MOVLW .5;
+023A   0227           00289                                 SUBWF CONT_MILIS,W;
+023B   1D03           00290                                 BTFSS STATUS,Z;
+023C   2A39           00291                                 GOTO  ESP_5MS;
+023D   0008           00292                                 RETURN;
+                      00293 ;--------------------------------------------------------------------------------------------------
+                      00294                         ;=========================================
+                      00295                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00296                         ;=========================================
+                      00297 
+023E   01A7           00298 RETARDO_2MS             CLRF CONT_MILIS;
+023F   3002           00299 ESP_2MS                 MOVLW .2;
+0240   0227           00300                                 SUBWF CONT_MILIS,W;
+0241   1D03           00301                                 BTFSS STATUS,Z;
+0242   2A3F           00302                                 GOTO  ESP_2MS;
+0243   0008           00303                                 RETURN;
+                      00304 ;--------------------------------------------------------------------------------------------------
+                      00464                         END
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 16
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CARGA                             0000013E
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+CHS1                              00000004
+CHS2                              00000005
+CICLO_SUP1                        0000009F
+CICLO_T1                          00000128
+CICLO_T2                          00000131
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+COLUMNA_1                         00000004
+COLUMNA_2                         00000005
+COLUMNA_3                         00000006
+COLUMNA_4                         00000007
+COMANDO_LCD                       0000013D
+CONT_LIST                         0000002A
+CONT_MILIS                        00000027
+CONT_MILS                         00000028
+CONT_SEG                          00000026
+CONT_SEÒAL                        0000002B
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DAC_0                             00000000
+DAC_1                             00000001
+DAC_2                             00000002
+DAC_3                             00000003
+DAC_4                             00000004
+DAC_5                             00000005
+DAC_6                             00000006
+DAC_7                             00000007
+DATA_ADDRESS                      00000005
+DC                                00000001
+D_A                               00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+ESP_0.08S                         00000233
+ESP_0.1S                          0000022D
+ESP_2MS                           0000023F
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 18
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ESP_5MS                           00000239
+ESP_5S                            00000227
+ESP_INT1MS                        00000221
+EXPL_TECL                         00000106
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+LCD_D0                            00000000
+LCD_D1                            00000001
+LCD_D2                            00000002
+LCD_D3                            00000003
+LCD_D4                            00000004
+LCD_D5                            00000005
+LCD_D6                            00000006
+LCD_D7                            00000007
+LCD_E                             00000001
+LCD_INI                           0000004E
+LCD_R#S                           00000000
+LED_ROJO                          00000002
+LIST_FUN                          0000005A
+LOOP_PRIN                         00000103
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+NO_SIGNAL                         00000063
+OBF                               00000006
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+OERR                              00000001
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PRESC_1                           00000024
+PRESC_2                           00000025
+PRINT_LCD                         0000013B
+PROGA                             0000003C
+PROGB                             000000F0
+PROGC                             00000000
+PROGD                             00000000
+PROGE                             00000003
+PROG_INI                          00000019
+PROG_PRIN                         000000C1
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+R                                 00000002
+RBIE                              00000003
+RBIF                              00000000
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+READ_LIST1                        000000A0
+READ_LIST2                        000000A8
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+READ_LIST3                        000000B0
+READ_LIST4                        000000B8
+READ_WRITE                        00000002
+RENGLON_1                         00000000
+RENGLON_2                         00000001
+RENGLON_3                         00000002
+RENGLON_4                         00000003
+RESP_STATUS                       00000021
+RESP_W                            00000020
+RES_FSR                           00000023
+RES_PCLATH                        00000022
+RETARDO_0.08S                     00000232
+RETARDO_0.1S                      0000022C
+RETARDO_1MS                       00000220
+RETARDO_2MS                       0000023E
+RETARDO_5MS                       00000238
+RETARDO_5S                        00000226
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RUTINA_INT                        00000036
+RX9                               00000006
+RX9D                              00000000
+R_W                               00000002
+S                                 00000003
+SAL_INT                           0000000F
+SAL_RUTINT                        0000004C
+SEC_LED                           0000004B
+SELECT_FUNCION                    00000029
+SEN                               00000000
+SENO_LIST1                        00000075
+SENO_LIST2                        0000008A
+SIG_INT                           0000003E
+SIN_USORA2                        00000002
+SIN_USORA3                        00000003
+SIN_USORA4                        00000004
+SIN_USORA5                        00000005
+SIN_USORE0                        00000000
+SIN_USORE1                        00000001
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 21
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+SÒAL_SENOI                        00000072
+SÒAL_SQURE                        00000068
+SÒAL_TRIAN                        0000006F
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TECLA_1                           00000114
+TECLA_2                           00000119
+TECLA_3                           0000011E
+TECLA_4                           00000123
+TEXT_INI                          00000145
+TEXT_MENU                         00000174
+TEXT_SENOI                        000001D6
+TEXT_SQUARE                       000001B1
+TEXT_TRIAN                        000001FB
+TMB                               00000085
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISB                             00000086
+TRISC                             00000087
+TRISD                             00000088
+TRISE                             00000089
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 22
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+VEC_INT                           00000004
+VEC_RESET                         00000000
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_HS_OSC                           00003FFE
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+MPASM  5.30.01        GENERADOR DE FUNCIONES.ASM   5-6-2024  15:12:49         PAGE 23
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+
+0000 : XX--XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+00C0 : XXX------------- ---------------- ---------------- ----------------
+0100 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0140 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0180 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+01C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0200 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0240 : XXXX------------ ---------------- ---------------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   517
+Program Memory Words Free:  7675
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

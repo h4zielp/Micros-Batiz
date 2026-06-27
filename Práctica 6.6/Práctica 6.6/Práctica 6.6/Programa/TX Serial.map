@@ -1,0 +1,76 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Mon Jul 01 00:30:45 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x0000a2
+                   .org_3       code   0x000100    program   0x0000a4
+ .config_2007_TX SERIAL.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x000054      
+                            0x000100    0x000151      
+                            0x002007    0x002007      
+            166 out of 8456 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    CARGA   0x000148    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                 CONTADOR   0x00010a    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                CONV_7SEG   0x000047    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   END_TX   0x000150    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   ESP_1S   0x000104    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                 LOOP_INT   0x000105    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                LOOP_PRIN   0x000100    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  LOOP_TX   0x00013c    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+               PRINT_7SEG   0x000129    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                 PROG_INI   0x000019    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                PROG_PRIN   0x000054    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+               RUTINA_INT   0x000036    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  SAL_INT   0x00000f    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+               SAL_RUTINT   0x000045    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   SEND_0   0x000144    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   SEND_1   0x000146    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  SIG_INT   0x00003c    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+              TRANSMISION   0x00013b    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  VEC_INT   0x000004    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                VEC_RESET   0x000000    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  VEC_INT   0x000004    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  SAL_INT   0x00000f    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                 PROG_INI   0x000019    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+               RUTINA_INT   0x000036    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  SIG_INT   0x00003c    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+               SAL_RUTINT   0x000045    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                CONV_7SEG   0x000047    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                PROG_PRIN   0x000054    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                LOOP_PRIN   0x000100    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   ESP_1S   0x000104    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                 LOOP_INT   0x000105    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                 CONTADOR   0x00010a    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+               PRINT_7SEG   0x000129    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+              TRANSMISION   0x00013b    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                  LOOP_TX   0x00013c    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   SEND_0   0x000144    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   SEND_1   0x000146    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                    CARGA   0x000148    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+                   END_TX   0x000150    program     static C:\Users\puent\Downloads\Práctica 6.6\Práctica 6.6\Programa\TX Serial.ASM
+
+

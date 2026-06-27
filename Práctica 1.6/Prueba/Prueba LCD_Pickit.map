@@ -1,0 +1,76 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Wed Mar 06 11:19:23 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x0000ee
+.config_2007_PRUEBA LCD_PICKIT.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x00007a      
+                            0x002007    0x002007      
+            122 out of 8453 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                BLINK_LED   0x000069    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                    CARGA   0x00005e    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+              COMANDO_LCD   0x00005d    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  ESP_INT   0x000064    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+               ESP_INT1MS   0x000070    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+              ESP_INT40MS   0x000076    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  LCD_INI   0x000045    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                LOOP_PRIN   0x000052    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                PRINT_LCD   0x00005b    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                 PROG_INI   0x00002b    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                PROG_PRIN   0x000050    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+              RETARDO_1MS   0x00006f    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+             RETARDO_40MS   0x000075    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+               RUTINA_INT   0x000019    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  SAL_INT   0x00000f    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+               SAL_RUTINT   0x000029    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  SEC_LED   0x00006d    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  SIG_INT   0x000020    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                    TRYME   0x000056    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  VEC_INT   0x000004    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                VEC_RESET   0x000000    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  VEC_INT   0x000004    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  SAL_INT   0x00000f    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+               RUTINA_INT   0x000019    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  SIG_INT   0x000020    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+               SAL_RUTINT   0x000029    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                 PROG_INI   0x00002b    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  LCD_INI   0x000045    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                PROG_PRIN   0x000050    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                LOOP_PRIN   0x000052    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                    TRYME   0x000056    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                PRINT_LCD   0x00005b    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+              COMANDO_LCD   0x00005d    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                    CARGA   0x00005e    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  ESP_INT   0x000064    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                BLINK_LED   0x000069    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+                  SEC_LED   0x00006d    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+              RETARDO_1MS   0x00006f    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+               ESP_INT1MS   0x000070    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+             RETARDO_40MS   0x000075    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+              ESP_INT40MS   0x000076    program     static F:\AMM\Práctica 1.6\Prueba\Prueba LCD_Pickit.asm
+
+

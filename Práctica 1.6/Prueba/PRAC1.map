@@ -1,0 +1,74 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Wed Mar 06 10:49:32 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x0001d8
+     .config_2007_PRAC1.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x0000ef      
+                            0x002007    0x002007      
+            239 out of 8453 program addresses used, program memory utilization is 2%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+           CONV_BIN_ASCII   0x00009c    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               CUENTA_BIN   0x000068    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  ESP_INT   0x000063    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               ESP_INT1MS   0x0000e5    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              ESP_INT40MS   0x0000eb    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              INI_CTA_LCD   0x00004b    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  INI_LCD   0x0000cd    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                LOOP_PRIN   0x000046    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              MUESTRA_CTA   0x0000af    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                 PROG_INI   0x00002a    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                PROG_PRIN   0x000043    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+             PULSO_ENABLE   0x0000df    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              RETARDO_1MS   0x0000e4    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                 RET_40MS   0x0000ea    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               RUTINA_INT   0x000019    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+             SALTE_CUENTA   0x00009b    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  SAL_INT   0x00000f    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               SAL_RUTINT   0x000028    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  VEC_INT   0x000004    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                VEC_RESET   0x000000    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  VEC_INT   0x000004    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  SAL_INT   0x00000f    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               RUTINA_INT   0x000019    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               SAL_RUTINT   0x000028    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                 PROG_INI   0x00002a    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                PROG_PRIN   0x000043    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                LOOP_PRIN   0x000046    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              INI_CTA_LCD   0x00004b    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  ESP_INT   0x000063    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               CUENTA_BIN   0x000068    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+             SALTE_CUENTA   0x00009b    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+           CONV_BIN_ASCII   0x00009c    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              MUESTRA_CTA   0x0000af    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                  INI_LCD   0x0000cd    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+             PULSO_ENABLE   0x0000df    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              RETARDO_1MS   0x0000e4    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+               ESP_INT1MS   0x0000e5    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+                 RET_40MS   0x0000ea    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+              ESP_INT40MS   0x0000eb    program     static F:\AMM\Práctica 1.6\Prueba\PRAC1.asm
+
+

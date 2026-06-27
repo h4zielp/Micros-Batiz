@@ -1,0 +1,775 @@
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ; CECYT 9 JUAN DE DIOS BATIZ.
+                      00002 ;
+                      00003 ; PRACTICA 0';.
+                      00004 ; MANEJO DE UN LED OSCILANDO A 1 Hz.
+                      00005 ;
+                      00006 ; EQUIPO:       GRUPO: 6IMX.
+                      00007 ;
+                      00008 ; INTEGRANTES:
+                      00009 ; 1.-RAMIREZ PACHECO.
+                      00010 ; 2.-RAMIREZ ESTRADA.
+                      00011 ; 3.-VEGA ALTAMIRANO.
+                      00012 ; 4.-YASKAWA SANCHEZ.
+                      00013 ;
+                      00014 ; FECHA DE ENTREGA DEL REPORTE.
+                      00015 ;
+                      00016 ; ESTE PROGRAMA CONTROLA UN LED HACIENDOLO OSCILAR A UNA
+                      00017 ; FRECUENCIA DE UN SEGUNDO, UTILIZANDO
+                      00018 ; INTERRUPCIONES CON EL TMR0.
+                      00019 ;
+                      00020 ;--------------------------------------------------------------------------------------------------
+                      00021  LIST   P=16F877A;
+                      00022  
+                      00023  ;#include "C:\Program Files (x86)\Microchip\MPASM Suite\P16F877A.INC";
+                      00024  #INCLUDE "C:\Program Files\Microchip\MPASM Suite\P16F877A.INC";
+                      00001         LIST
+                      00002 ; P16F877A.INC  Standard Header File, Version 1.00    Microchip Technology, Inc.
+                      00400         LIST
+                      00025 
+                      00026  
+2007   3F39           00027  __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_OFF & _XT_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF;
+                      00028 ;--------------------------------------------------------------------------------------------------
+                      00029 ;
+                      00030 ; Fosc = 4 MHz.
+                      00031 ; Ciclo de trabajo del PIC = (1/fosc)*4 = 1 µs.
+                      00032 ; T int =(256-tmr0)*(P)*((1/4000000)*4) = 1 ms. // Tiempo de interrupción.
+                      00033 ; tmr0=131, P=8.
+                      00034 ; frec int = 1/ t int = 1 KHz.
+                      00035 ;----------------------------------------------------------------------------------------------------
+                      00036 ;
+                      00037 ;Def. de variables del programa en RAM.
+                      00038 
+  00000020            00039 RESP_W                  EQU 0X20;
+  00000021            00040 RESP_STATUS     EQU 0X21;
+  00000022            00041 RES_PCLATH              EQU 0X22;
+  00000023            00042 RES_FSR                 EQU 0X23;
+  00000024            00043 PRESC_1                 EQU 0X24; .001 100 5
+  00000025            00044 PRESC_2                 EQU 0X25; t int = t intb * presc_1 * presc_2
+  00000026            00045 BANDERAS                EQU 0X26;
+  00000027            00046 CONT_MILIS              EQU 0X27;
+                      00047 
+                      00048 ;---------------------------------------------------------------------------------------------------
+                      00049 ; Def. de constantes a utilizar.
+  00000083            00050 TMB     EQU     .131;
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00051 
+                      00052 ; banderas del registro banderas.
+  00000000            00053 BAN_INT                 EQU .0;
+  00000001            00054 BAN_24H                 EQU .1;
+  00000002            00055 SIN_BD2                 EQU .2;
+  00000003            00056 SIN_BD3                 EQU .3;
+  00000004            00057 SIN_BD4                 EQU .4;
+  00000005            00058 SIN_BD5                 EQU .5;
+  00000006            00059 SIN_BD6                 EQU .6;
+  00000007            00060 SIN_BD7                 EQU .7;
+                      00061 ;---------------------------------------------------------------------------------------------------
+                      00062 
+                      00063 ; Def. de Ptos. I/0.
+                      00064 
+                      00065 ; Puerto A.
+  00000000            00066 LCD_R#S    EQU .0;
+  00000001            00067 LCD_E      EQU .1;
+  00000002            00068 SIN_USORA2 EQU .2;
+  00000003            00069 SIN_USORA3 EQU .3;
+  00000004            00070 SIN_USORA4 EQU .4;
+  00000005            00071 SIN_USORA5 EQU .5;
+                      00072 
+  00000000            00073 PROGA EQU B'000000';Def. la config. de los bits del pto. a.
+                      00074 
+                      00075 ;Puerto B.
+  00000000            00076 SIN_USORB0 EQU .0;
+  00000001            00077 SIN_USORB1 EQU .1;
+  00000002            00078 SIN_USORB2 EQU .2;
+  00000003            00079 SIN_USORB3 EQU .3;
+  00000004            00080 SIN_USORB4 EQU .4;
+  00000005            00081 SIN_USORB5 EQU .5;
+  00000006            00082 SIN_USORB6 EQU .6;
+  00000007            00083 SIN_USORB7 EQU .7;
+                      00084 
+  000000FF            00085 PROGB EQU B'11111111'; // Programación inicial del puerto B.
+                      00086 
+                      00087 ;Puerto C.
+  00000000            00088 LCD_D0 EQU .0;
+  00000001            00089 LCD_D1 EQU .1;
+  00000002            00090 LCD_D2 EQU .2;
+  00000003            00091 LCD_D3 EQU .3;
+  00000004            00092 LCD_D4 EQU .4;
+  00000005            00093 LCD_D5 EQU .5;
+  00000006            00094 LCD_D6 EQU .6;
+  00000007            00095 LCD_D7 EQU .7;
+                      00096 
+  00000000            00097 PROGC EQU B'00000000'; // Programación inicial del puerto C como 
+                      00098                                                  ;Entrada.
+                      00099 ;Puerto D.
+  00000000            00100 SIN_USORD0 EQU .0;
+  00000001            00101 SIN_USORD1 EQU .1;
+  00000002            00102 SIN_USORD2 EQU .2;
+  00000003            00103 SIN_USORD3 EQU .3;
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000004            00104 SIN_USORD4 EQU .4;
+  00000005            00105 SIN_USORD5 EQU .5;
+  00000006            00106 SIN_USORD6 EQU .6;
+  00000007            00107 SIN_USORD7 EQU .7;
+                      00108 
+  000000FF            00109 PROGD EQU B'11111111';Def.
+                      00110 
+                      00111 ; Puerto E.
+  00000000            00112 SIN_USORE0 EQU .0;
+  00000001            00113 SIN_USORE1 EQU .1;
+  00000002            00114 LED_ROJO   EQU .2;
+                      00115 
+  00000003            00116 PROGE EQU B'011';Def. la encua.
+                      00117 ;-------------------------------------------------------------------------------------------------
+                      00118 
+                      00119                         ;=================
+                      00120                         ;== Vector Reset ==
+                      00121                         ;=================
+0000                  00122                         ORG 0000H;
+0000   018A           00123 VEC_RESET       CLRF PCLATH;
+                      00124 
+0001   2850           00125                         GOTO PROG_PRIN;
+                      00126 ;-------------------------------------------------------------------------------------------------
+                      00127 
+                      00128                         ;=============================
+                      00129                         ;== Subrutina de Interrupciones ==
+                      00130                         ;=============================
+                      00131                         
+0004                  00132                         ORG 0004H;
+0004   00A0           00133 VEC_INT         MOVWF RESP_W;resp. esl estado del reg. w.
+0005   0803           00134                         MOVF STATUS,W;
+0006   00A1           00135                         MOVWF RESP_STATUS;resp. banderas de la alu.
+0007   0183           00136                         CLRF STATUS;
+0008   080A           00137                         MOVF PCLATH,W;
+0009   00A2           00138                         MOVWF RES_PCLATH;
+000A   018A           00139                         CLRF PCLATH;
+000B   0804           00140                         MOVF FSR,W;
+000C   00A3           00141                         MOVWF RES_FSR;
+                      00142 
+000D   190B           00143                         BTFSC INTCON,T0IF;
+000E   2019           00144                         CALL RUTINA_INT;
+                      00145 
+000F   0823           00146 SAL_INT         MOVF RES_FSR,W;
+0010   0084           00147                         MOVWF FSR;
+0011   0822           00148                         MOVF RES_PCLATH,W;
+0012   008A           00149                         MOVWF PCLATH;
+0013   0821           00150                         MOVF RESP_STATUS,W;
+0014   0083           00151                         MOVWF STATUS;
+0015   0820           00152                         MOVF RESP_W,W;
+0016   3083           00153                         MOVLW TMB;
+0017   0081           00154                         MOVWF TMR0;
+                      00155                         
+0018   0009           00156                         RETFIE;
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00157 ;--------------------------------------------------------------------------------------------------
+                      00158 
+                      00159                         ;=============================
+                      00160                         ;== Subrutina de Interrupciones ==
+                      00161                         ;=============================
+                      00162                         
+0019   0AA7           00163 RUTINA_INT      INCF CONT_MILIS,F;
+001A   0AA4           00164                         INCF PRESC_1,F;
+                      00165 
+001B   3064           00166                         MOVLW .100;
+001C   0624           00167                         XORWF PRESC_1,W;
+001D   1D03           00168                         BTFSS STATUS,Z;
+001E   2829           00169                         GOTO SAL_RUTINT;
+001F   2820           00170                         GOTO SIG_INT;
+                      00171 
+0020   01A4           00172 SIG_INT         CLRF PRESC_1;
+0021   0AA5           00173                         INCF PRESC_2,F;
+0022   300A           00174                         MOVLW .10;
+0023   0625           00175                         XORWF PRESC_2,W;
+0024   1D03           00176                         BTFSS STATUS,Z;
+0025   2829           00177                         GOTO SAL_RUTINT;
+0026   01A4           00178                         CLRF PRESC_1;
+0027   01A5           00179                         CLRF PRESC_2;
+                      00180 
+0028   1426           00181                         BSF BANDERAS,BAN_INT;
+                      00182 
+0029   110B           00183 SAL_RUTINT      BCF INTCON,T0IF;
+                      00184                         
+002A   0008           00185                         RETURN;
+                      00186 ;--------------------------------------------------------------------------------------------------
+                      00187                         ;================================
+                      00188                         ;== Subrutina de Ini. de Reg. del Pic ==
+                      00189                         ;================================
+                      00190 
+002B   1683           00191 PROG_INI        BSF STATUS,RP0; Ponte en el banco 1 de ram.
+002C   3082           00192                         MOVLW 0X82;
+002D   0081           00193                         MOVWF OPTION_REG ^0X80;
+002E   3000           00194                         MOVLW PROGA;
+002F   0085           00195                         MOVWF TRISA ^0X80;
+0030   30FF           00196                         MOVLW PROGB;
+0031   0086           00197                         MOVWF TRISB ^0X80;
+0032   3000           00198                         MOVLW PROGC;
+0033   0087           00199                         MOVWF TRISC ^0X80;
+0034   30FF           00200                         MOVLW PROGD;
+0035   0088           00201                         MOVWF TRISD ^0X80;
+0036   3003           00202                         MOVLW PROGE;
+0037   0089           00203                         MOVWF TRISE ^0X80;
+0038   3006           00204                         MOVLW 0X06;
+0039   009F           00205                         MOVWF ADCON1 ^0X80;
+003A   1283           00206                         BCF STATUS,RP0; Ponte en el banco 0 de ram.
+                      00207 
+003B   30A0           00208                         MOVLW 0XA0;
+003C   008B           00209                         MOVWF INTCON;
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+003D   3083           00210                         MOVLW TMB;
+003E   0081           00211                         MOVWF TMR0;
+                      00212                         
+003F   01A6           00213                         CLRF BANDERAS;
+0040   01A7           00214                         CLRF CONT_MILIS;
+                      00215 
+0041   0187           00216                         CLRF PORTC;
+0042   3003           00217                         MOVLW 0X03;
+0043   0085           00218                         MOVWF PORTA;
+                      00219                 
+0044   0008           00220                         RETURN;
+                      00221                         
+                      00222 ;--------------------------------------------------------------------------------------------------
+                      00223                         ;=====================
+                      00224                         ;== Inicializar LCD ==
+                      00225                         ;=====================
+                      00226 
+0045   3038           00227 LCD_INI         MOVLW 0X38;
+0046   205D           00228                         CALL COMANDO_LCD;
+0047   3001           00229                         MOVLW 0X01;
+0048   205D           00230                         CALL COMANDO_LCD;
+0049   3006           00231                         MOVLW 0X06;
+004A   205D           00232                         CALL COMANDO_LCD;
+004B   300C           00233                         MOVLW 0X0C;
+004C   205D           00234                         CALL COMANDO_LCD;
+004D   3080           00235                         MOVLW 0X80;
+004E   205D           00236                         CALL COMANDO_LCD;
+                      00237                                         
+004F   0008           00238                         RETURN;
+                      00239 
+                      00240 ;--------------------------------------------------------------------------------------------------
+                      00241  
+                      00242                         ;=====================
+                      00243                         ;== Programa principal ==
+                      00244                         ;=====================
+                      00245 
+0050   202B           00246 PROG_PRIN       CALL PROG_INI;
+0051   2045           00247                         CALL LCD_INI;
+                      00248 
+0052   2064           00249 LOOP_PRIN       CALL ESP_INT;
+0053   2069           00250                         CALL BLINK_LED;
+                      00251                                 
+0054   2056           00252                         CALL TRYME;
+                      00253                         
+0055   2852           00254                         GOTO LOOP_PRIN;
+                      00255 ;--------------------------------------------------------------------------------------------------
+                      00256 
+0056   3084           00257 TRYME           MOVLW 0X84;
+0057   205D           00258                         CALL COMANDO_LCD;
+0058   3045           00259                         MOVLW 'E';
+0059   205B           00260                         CALL PRINT_LCD;
+005A   0008           00261                         RETURN;
+                      00262 
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00263 ;--------------------------------------------------------------------------------------------------
+                      00264                         ;=========================================
+                      00265                         ;== Subrutina de HABILITACIÓN DE LCD (E) ==
+                      00266                         ;=========================================
+                      00267         
+005B   1405           00268 PRINT_LCD               BSF PORTA,LCD_R#S;
+005C   285E           00269                                 GOTO CARGA;
+                      00270 
+005D   1005           00271 COMANDO_LCD             BCF PORTA,LCD_R#S; Modo comando
+005E   0087           00272 CARGA                   MOVWF PORTC;
+                      00273 
+005F   1085           00274                                 BCF PORTA,LCD_E;
+0060   206F           00275                                 CALL RETARDO_1MS;
+0061   1485           00276                                 BSF PORTA,LCD_E;
+                      00277 
+0062   2075           00278                                 CALL RETARDO_40MS; 
+                      00279 
+0063   0008           00280                                 RETURN;
+                      00281 
+                      00282                         ;=========================================
+                      00283                         ;== Subrutina de espera de int. de 1 segundo ==
+                      00284                         ;=========================================
+                      00285                         
+0064   0000           00286 ESP_INT         NOP;
+0065   1C26           00287                         BTFSS BANDERAS,BAN_INT;
+0066   2864           00288                         GOTO ESP_INT;
+0067   1026           00289                         BCF BANDERAS,BAN_INT;
+                      00290                         
+0068   0008           00291                         RETURN;
+                      00292 ;--------------------------------------------------------------------------------------------------
+                      00293                         ;=========================================
+                      00294                         ;== Subrutina de oscilación del LED ==
+                      00295                         ;=========================================
+                      00296                         
+0069   1D09           00297 BLINK_LED       BTFSS PORTE,LED_ROJO;
+006A   286D           00298                         GOTO SEC_LED;
+006B   1109           00299                         BCF PORTE,LED_ROJO; Prende el led.
+006C   0008           00300                         RETURN;
+                      00301                         
+006D   1509           00302 SEC_LED         BSF PORTE,LED_ROJO; Apaga el led.
+006E   0008           00303                         RETURN;
+                      00304 
+                      00305 
+                      00306 ;---------------------------------------------------------------------------------------------
+                      00307 
+                      00308                         ;=========================================
+                      00309                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00310                         ;=========================================
+                      00311 
+006F   01A7           00312 RETARDO_1MS     CLRF CONT_MILIS;
+0070   3001           00313 ESP_INT1MS              MOVLW .1;
+0071   0227           00314                                 SUBWF CONT_MILIS,W;
+0072   1D03           00315                                 BTFSS STATUS,Z;
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0073   2870           00316                                 GOTO  ESP_INT1MS;
+0074   0008           00317                                 RETURN;
+                      00318 ;--------------------------------------------------------------------------------------------------
+                      00319                         ;=========================================
+                      00320                         ;== Subrutina de RETARDO_2ms MILISEGUNDOS ==
+                      00321                         ;=========================================
+                      00322 
+0075   01A7           00323 RETARDO_40MS    CLRF CONT_MILIS;
+0076   3028           00324 ESP_INT40MS             MOVLW .40;
+0077   0227           00325                                 SUBWF CONT_MILIS,W;
+0078   1D03           00326                                 BTFSS STATUS,Z;
+0079   2876           00327                                 GOTO  ESP_INT40MS;
+007A   0008           00328                                 RETURN;
+                      00329 ;--------------------------------------------------------------------------------------------------
+                      00330 
+                      00331                         END
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+BANDERAS                          00000026
+BAN_24H                           00000001
+BAN_INT                           00000000
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BLINK_LED                         00000069
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CARGA                             0000005E
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+CHS1                              00000004
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+COMANDO_LCD                       0000005D
+CONT_MILIS                        00000027
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+D_A                               00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+ESP_INT                           00000064
+ESP_INT1MS                        00000070
+ESP_INT40MS                       00000076
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+LCD_D0                            00000000
+LCD_D1                            00000001
+LCD_D2                            00000002
+LCD_D3                            00000003
+LCD_D4                            00000004
+LCD_D5                            00000005
+LCD_D6                            00000006
+LCD_D7                            00000007
+LCD_E                             00000001
+LCD_INI                           00000045
+LCD_R#S                           00000000
+LED_ROJO                          00000002
+LOOP_PRIN                         00000052
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PR2                               00000092
+PRESC_1                           00000024
+PRESC_2                           00000025
+PRINT_LCD                         0000005B
+PROGA                             00000000
+PROGB                             000000FF
+PROGC                             00000000
+PROGD                             000000FF
+PROGE                             00000003
+PROG_INI                          0000002B
+PROG_PRIN                         00000050
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+R                                 00000002
+RBIE                              00000003
+RBIF                              00000000
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+READ_WRITE                        00000002
+RESP_STATUS                       00000021
+RESP_W                            00000020
+RES_FSR                           00000023
+RES_PCLATH                        00000022
+RETARDO_1MS                       0000006F
+RETARDO_40MS                      00000075
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RUTINA_INT                        00000019
+RX9                               00000006
+RX9D                              00000000
+R_W                               00000002
+S                                 00000003
+SAL_INT                           0000000F
+SAL_RUTINT                        00000029
+SEC_LED                           0000006D
+SEN                               00000000
+SIG_INT                           00000020
+SIN_BD2                           00000002
+SIN_BD3                           00000003
+SIN_BD4                           00000004
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SIN_BD5                           00000005
+SIN_BD6                           00000006
+SIN_BD7                           00000007
+SIN_USORA2                        00000002
+SIN_USORA3                        00000003
+SIN_USORA4                        00000004
+SIN_USORA5                        00000005
+SIN_USORB0                        00000000
+SIN_USORB1                        00000001
+SIN_USORB2                        00000002
+SIN_USORB3                        00000003
+SIN_USORB4                        00000004
+SIN_USORB5                        00000005
+SIN_USORB6                        00000006
+SIN_USORB7                        00000007
+SIN_USORD0                        00000000
+SIN_USORD1                        00000001
+SIN_USORD2                        00000002
+SIN_USORD3                        00000003
+SIN_USORD4                        00000004
+SIN_USORD5                        00000005
+SIN_USORD6                        00000006
+SIN_USORD7                        00000007
+SIN_USORE0                        00000000
+SIN_USORE1                        00000001
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMB                               00000083
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISB                             00000086
+TRISC                             00000087
+TRISD                             00000088
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TRYME                             00000056
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+VEC_INT                           00000004
+VEC_RESET                         00000000
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_CPD_OFF                          00003FFF
+MPASM  5.30.01             PRUEBA LCD_PICKIT.ASM   3-6-2024  11:19:19         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_HS_OSC                           00003FFE
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : XX--XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXX-----
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   121
+Program Memory Words Free:  8071
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

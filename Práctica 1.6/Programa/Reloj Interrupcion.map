@@ -1,0 +1,86 @@
+MPLINK 4.30.01, Linker
+Linker Map File - Created Wed Apr 03 12:40:54 2024
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000004
+                   .org_2       code   0x000004    program   0x0001ec
+.config_2007_RELOJ INTERRUPCION.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000001      
+                            0x000004    0x0000f9      
+                            0x002007    0x002007      
+            249 out of 8453 program addresses used, program memory utilization is 2%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+              ARMA_TIEMPO   0x0000dc    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+                BLINK_LED   0x000074    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                    CARGA   0x000060    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+              COMANDO_LCD   0x00005f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+             CONV_A_ASCII   0x0000ef    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+               CTA_TIEMPO   0x0000a7    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+                  ESP_INT   0x00006f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+               ESP_INT1MS   0x00007b    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+              ESP_INT40MS   0x000081    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  LCD_INI   0x000051    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                LOOP_PRIN   0x000069    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+             MUESTRA_TIME   0x000086    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+                PRINT_LCD   0x00005d    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                 PROG_INI   0x000019    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                PROG_PRIN   0x000067    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  RETARDO   0x00007a    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+             RETARDO_40MS   0x000080    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+               RUTINA_INT   0x00003f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+               SAL_CTATIM   0x0000db    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+                  SAL_INT   0x00000f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+               SAL_RUTINT   0x00004f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  SEC_LED   0x000078    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  SIG_INT   0x000046    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                 TIME_OUT   0x0000d0    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                VEC_RESET   0x000000    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  VEC_INT   0x000004    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  SAL_INT   0x00000f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                 PROG_INI   0x000019    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+               RUTINA_INT   0x00003f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  SIG_INT   0x000046    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+               SAL_RUTINT   0x00004f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  LCD_INI   0x000051    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                PRINT_LCD   0x00005d    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+              COMANDO_LCD   0x00005f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                    CARGA   0x000060    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                PROG_PRIN   0x000067    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                LOOP_PRIN   0x000069    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  ESP_INT   0x00006f    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                BLINK_LED   0x000074    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  SEC_LED   0x000078    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+                  RETARDO   0x00007a    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+               ESP_INT1MS   0x00007b    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+             RETARDO_40MS   0x000080    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+              ESP_INT40MS   0x000081    program     static E:\AMM\Práctica 1.6\Programa\Reloj Interrupcion.asm
+             MUESTRA_TIME   0x000086    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+               CTA_TIEMPO   0x0000a7    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+                 TIME_OUT   0x0000d0    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+               SAL_CTATIM   0x0000db    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+              ARMA_TIEMPO   0x0000dc    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+             CONV_A_ASCII   0x0000ef    program     static E:\AMM\Práctica 1.6\Programa\Subrutinas control time.inc
+
+
